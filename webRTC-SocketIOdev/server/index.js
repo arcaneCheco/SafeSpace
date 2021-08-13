@@ -18,6 +18,12 @@ function createUsersOnline() {
     return onlyWithUserNames;
 }
 
+function distanceBetweeen(user1, user2) {
+    const distance = Math.sqrt(Math.pow((user1.xChange - user2.xChange),2) + Math.pow((user1.yChange - user2.yChange),2))
+    console.log(distance)
+    return distance;
+}
+
 function closeProximity() {
 
 };
@@ -30,7 +36,8 @@ io.on("connection", (socket) => {
     console.log(`made socket connection`);
     socket.on("new player", (username) => {
         console.log(`${username} joined the game`);
-        activePlayers[socket.id] = { username, socketId: socket.id, xChange: 0, yChange: 0 };
+        activePlayers[socket.id] = { username, socketId: socket.id, xChange: 0, yChange:0 };
+        console.log(activePlayers)
         io.emit("new player", createUsersOnline());
     });
     socket.on("disconnect", () => {
@@ -41,6 +48,9 @@ io.on("connection", (socket) => {
     socket.on("movePlayer", (data) => {
         activePlayers[socket.id].xChange = data.xChange;
         activePlayers[socket.id].yChange = data.yChange;
+        const usersOnline = createUsersOnline();
+        usersOnline.length === 2 && distanceBetweeen(usersOnline[0], usersOnline[1])
+        console.log(usersOnline)
         io.emit("movePlayer", { ...data, socketId: socket.id });
     });
 });
