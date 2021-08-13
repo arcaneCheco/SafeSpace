@@ -25,6 +25,7 @@ socket.on("player disconnected", (socketId) => {
     const disconnectedPlayer = document.getElementById(socketId);
     disconnectedPlayer && disconnectedPlayer.remove();
 });
+console.log('FIREEEEE')
 let xChange = 0;
 let yChange = 0;
 const speed = 10;
