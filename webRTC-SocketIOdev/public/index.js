@@ -25,7 +25,7 @@ socket.on("player disconnected", (socketId) => {
     const disconnectedPlayer = document.getElementById(socketId);
     disconnectedPlayer && disconnectedPlayer.remove();
 });
-console.log('FIREEEEE')
+
 let xChange = 0;
 let yChange = 0;
 const speed = 10;
@@ -42,8 +42,9 @@ const changePosition = (e) => {
     socket.emit("movePlayer", { xChange, yChange });
 };
 document.addEventListener("keydown", changePosition);
-socket.on("movePlayer", ({ xChange, yChange, socketId, }) => {
+socket.on("movePlayer", ({ xChange, yChange, socketId, playerClose }) => {
     const player = document.getElementById(socketId);
+    console.log('player close: ', playerClose)
     player &&
         (player.style.transform = `translate(${xChange}px, ${yChange}px)`);
 });
