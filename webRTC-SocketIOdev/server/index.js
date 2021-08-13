@@ -45,9 +45,15 @@ function closeProximityAlert(socketIdentifier) {
   );
 
   if (currentUser) {
-    for (const dist in currentUser.distances) {
-      if (currentUser.distances[dist] < 150)
-        console.log(`close to user ${dist}`);
+    for (const user in currentUser.distances) {
+      if (currentUser.distances[user] < 300) {
+          let opacityValue = 1/(currentUser.distances[user] - 150)*10;
+        if (currentUser.distances[user] < 150) {
+          console.log(`Fully connected to ${user}`);
+        } else {
+          console.log(`close to user ${user}, opacity value: ${opacityValue}`);
+        }
+      }
     }
   }
 }
@@ -81,7 +87,7 @@ io.on("connection", (socket) => {
     const usersOnline = createUsersOnline();
     let playerClose = closeProximityAlert(socket.id);
     //closeProximityAlert(socket.id);
-    console.log(usersOnline)
+    //console.log(usersOnline)
 
     io.emit("movePlayer", { ...data, socketId: socket.id, playerClose });
   });
