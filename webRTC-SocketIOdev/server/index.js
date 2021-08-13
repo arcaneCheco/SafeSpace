@@ -11,28 +11,36 @@ const server = app.listen(PORT, () => {
         console.log(err);
     }
 });
-app.use(express.static("public"));
+
+function createUsersOnline() {
+    const values = Object.values(activePlayers);
+    const onlyWithUserNames = values.filter(u => u.username !== undefined);
+    return onlyWithUserNames;
+}
+
+function closeProximity() {
+
+};
+
+
+app.use(express.static("../public"));
 const io = socketIO(server);
-let activePlayers = [];
+const activePlayers = {};
 io.on("connection", (socket) => {
     console.log(`made socket connection`);
     socket.on("new player", (username) => {
         console.log(`${username} joined the game`);
-        activePlayers.push({ username, socketId: socket.id });
-        io.emit("new player", activePlayers);
+        activePlayers[socket.id] = { username, socketId: socket.id, xChange: 0, yChange: 0 };
+        io.emit("new player", createUsersOnline());
     });
     socket.on("disconnect", () => {
-        activePlayers = activePlayers.filter((player) => {
-            if (player.socketId === socket.id) {
-                console.log(`${player.username} has left the game.`);
-                io.emit("player disconnected", socket.id);
-                return false;
-            }
-            else
-                return true;
-        });
+        io.emit("player disconnected", socket.id);
+        activePlayers[socket.id] && console.log(`${activePlayers[socket.id].username} has left the game.`);
+        delete activePlayers[socket.id];
     });
     socket.on("movePlayer", (data) => {
+        activePlayers[socket.id].xChange = data.xChange;
+        activePlayers[socket.id].yChange = data.yChange;
         io.emit("movePlayer", { ...data, socketId: socket.id });
     });
 });
