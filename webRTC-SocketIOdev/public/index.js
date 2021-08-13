@@ -42,9 +42,8 @@ const changePosition = (e) => {
     socket.emit("movePlayer", { xChange, yChange });
 };
 document.addEventListener("keydown", changePosition);
-socket.on("movePlayer", ({ xChange, yChange, socketId, playerClose }) => {
+socket.on("movePlayer", ({ xChange, yChange, socketId }) => {
     const player = document.getElementById(socketId);
-    console.log('player close: ', playerClose)
     player &&
         (player.style.transform = `translate(${xChange}px, ${yChange}px)`);
 });

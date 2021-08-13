@@ -31,31 +31,22 @@ function getDistances(socketIdentifier) {
     (user) => user.socketId !== socketIdentifier
   );
   allOtherUsers.forEach((user) => {
-    activePlayers[socketIdentifier].distances[user.username] = distanceBetweeen(
-      user,
-      activePlayers[socketIdentifier]
-    );
-  });
-}
+    let distance = distanceBetweeen(user, activePlayers[socketIdentifier]);
+    activePlayers[socketIdentifier].distances[user.username] = distance;
 
-function closeProximityAlert(socketIdentifier) {
-  const onlineUsers = createUsersOnline();
-  const currentUser = onlineUsers.find(
-    (user) => user.socketId === socketIdentifier
-  );
-
-  if (currentUser) {
-    for (const user in currentUser.distances) {
-      if (currentUser.distances[user] < 300) {
-          let opacityValue = 1/(currentUser.distances[user] - 150)*10;
-        if (currentUser.distances[user] < 150) {
-          console.log(`Fully connected to ${user}`);
-        } else {
-          console.log(`close to user ${user}, opacity value: ${opacityValue}`);
-        }
+    if (distance < 300) {
+      let opacityValue = (1 / (distance - 150)) * 10;
+      if (distance < 150) {
+        //console.log(`Fully connected to ${user}`);
+        activePlayers[socketIdentifier].opacities[user.username] = 1;
+      } else {
+        //console.log(`close to user ${user}, opacity value: ${opacityValue}`);
+        activePlayers[socketIdentifier].opacities[user.username] = opacityValue;
       }
+    } else {
+      activePlayers[socketIdentifier].opacities[user.username] = 0;
     }
-  }
+  });
 }
 
 app.use(express.static("../public"));
@@ -71,6 +62,7 @@ io.on("connection", (socket) => {
       xChange: 0,
       yChange: 0,
       distances: {},
+      opacities: {},
     };
     io.emit("new player", createUsersOnline());
   });
@@ -85,10 +77,7 @@ io.on("connection", (socket) => {
     activePlayers[socket.id].yChange = data.yChange;
     getDistances(socket.id);
     const usersOnline = createUsersOnline();
-    let playerClose = closeProximityAlert(socket.id);
-    //closeProximityAlert(socket.id);
-    //console.log(usersOnline)
-
-    io.emit("movePlayer", { ...data, socketId: socket.id, playerClose });
+    console.log(usersOnline);
+    io.emit("movePlayer", { ...data, socketId: socket.id });
   });
 });

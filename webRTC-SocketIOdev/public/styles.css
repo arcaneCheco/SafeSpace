@@ -1,0 +1,33 @@
+h1 {
+  text-align: center;
+}
+.player {
+  width: 100px;
+  height: 100px;
+  background-color: chocolate;
+  border: 2px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+}
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: beige;
+}
+.videoScreenContainer {
+  display: flex;
+  justify-content: space-evenly;
+  height: 200px;
+  width: 100%;
+  background-color: rgb(83, 136, 180);
+}
+
+#videoScreen {
+  margin: 20px;
+  height: 80%;
+  width: 150px;
+  background-color: azure;
+}
