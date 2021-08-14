@@ -32,19 +32,24 @@ function getDistances(socketIdentifier) {
   );
   allOtherUsers.forEach((user) => {
     let distance = distanceBetweeen(user, activePlayers[socketIdentifier]);
+    // may need to change next 2 lines as when 2 users have same name issues will arise
     activePlayers[socketIdentifier].distances[user.username] = distance;
-
-    if (distance < 300) {
-      let opacityValue = (1 / (distance - 150)) * 10;
-      if (distance < 150) {
-        //console.log(`Fully connected to ${user}`);
+    activePlayers[user.socketId].distances[activePlayers[socketIdentifier].username] = distance;
+    //Opacity calculations
+    const outer = 150;
+    const inner = 75;
+    if (distance < outer*2) {
+      let opacityValue = 1 - ((distance - 2 * inner) / ((2 * outer) - (2 * inner)));
+      if (distance < inner*2) {
         activePlayers[socketIdentifier].opacities[user.username] = 1;
+        activePlayers[user.socketId].opacities[activePlayers[socketIdentifier].username] = 1;
       } else {
-        //console.log(`close to user ${user}, opacity value: ${opacityValue}`);
         activePlayers[socketIdentifier].opacities[user.username] = opacityValue;
+        activePlayers[user.socketId].opacities[activePlayers[socketIdentifier].username] = opacityValue;
       }
     } else {
       activePlayers[socketIdentifier].opacities[user.username] = 0;
+      activePlayers[user.socketId].opacities[activePlayers[socketIdentifier].username] = 0;
     }
   });
 }
