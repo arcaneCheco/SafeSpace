@@ -38,16 +38,16 @@ function getDistances(socketIdentifier) {
     //Opacity calculations
     const outer = 150;
     const inner = 75;
-    if (distance < outer*2) {
+    if (distance < outer*2) { // users are within outer radius
       let opacityValue = 1 - ((distance - 2 * inner) / ((2 * outer) - (2 * inner)));
-      if (distance < inner*2) {
+      if (distance < inner*2) { // users are within inner radius
         activePlayers[socketIdentifier].opacities[user.username] = 1;
         activePlayers[user.socketId].opacities[activePlayers[socketIdentifier].username] = 1;
-      } else {
+      } else { // users are inbetween outer and inner radius
         activePlayers[socketIdentifier].opacities[user.username] = opacityValue;
         activePlayers[user.socketId].opacities[activePlayers[socketIdentifier].username] = opacityValue;
       }
-    } else {
+    } else { // users are not within outer radius
       activePlayers[socketIdentifier].opacities[user.username] = 0;
       activePlayers[user.socketId].opacities[activePlayers[socketIdentifier].username] = 0;
     }
