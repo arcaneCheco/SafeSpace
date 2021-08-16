@@ -6,7 +6,15 @@ import * as CANNON from "cannon-es";
 /**
  * add socketIO
  */
-const socket = io();
+const socket = io("http://localhost:3001");
+socket.on("connection", () => {
+  console.log("new user entered the game");
+});
+
+const connectNewUser = () => {
+  const username = prompt("what's your name?");
+  socket.emit("new user", username);
+};
 
 /**
  * Debug
@@ -122,32 +130,32 @@ const floorBody = new CANNON.Body({
 world.addBody(floorBody);
 
 // user mesh
-// const userMesh = new THREE.Mesh(
-//   new THREE.BoxGeometry(1, 1, 1),
-//   new THREE.MeshNormalMaterial()
-// );
 const userMesh = new THREE.Mesh(
-  new THREE.SphereGeometry(1),
+  new THREE.BoxGeometry(1, 1, 1),
   new THREE.MeshNormalMaterial()
 );
+// const userMesh = new THREE.Mesh(
+//   new THREE.SphereGeometry(1),
+//   new THREE.MeshNormalMaterial()
+// );
 userMesh.position.y = 1;
 scene.add(userMesh);
 
 // user body
-// const userBody = new CANNON.Body({
-//   mass: 1.0,
-//   position: new CANNON.Vec3(0, 3, 0),
-//   shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
-//   material: userMaterial,
-// });
 const userBody = new CANNON.Body({
   mass: 1.0,
-  position: new CANNON.Vec3(0, 1, 0),
-  shape: new CANNON.Sphere(1),
+  position: new CANNON.Vec3(0, 3, 0),
+  shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
   material: userMaterial,
-  linearDamping: 0.6,
-  angularDamping: 0.6,
 });
+// const userBody = new CANNON.Body({
+//   mass: 1.0,
+//   position: new CANNON.Vec3(0, 1, 0),
+//   shape: new CANNON.Sphere(1),
+//   material: userMaterial,
+//   linearDamping: 0.6,
+//   angularDamping: 0.6,
+// });
 userBody.position.copy(userMesh.position);
 world.addBody(userBody);
 
