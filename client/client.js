@@ -4,6 +4,11 @@ import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import * as CANNON from "cannon-es";
 
 /**
+ * add socketIO
+ */
+const socket = io();
+
+/**
  * Debug
  */
 const parameters = {

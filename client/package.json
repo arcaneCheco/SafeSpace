@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "cannon-es": "^0.18.0",
+    "three": "^0.131.3"
+  }
+}
