@@ -1,18 +1,15 @@
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { GUI } from "three/examples/jsm/libs/dat.gui.module";
-import React, { Component, useEffect } from "react";
-import ReactDOM from "react-dom";
-import { client } from "./client";
-import { io } from "socket.io-client";
+import React, { useEffect } from "react";
+import { threeJsCanvas } from "./threeJsCanvas";
+import VideoContainer from "./components/VideoContainer/VideoContainer";
 
 const App = () => {
   useEffect(() => {
-    client();
+    threeJsCanvas();
   }, []);
 
   return (
     <div>
+      <VideoContainer />
       <canvas id="canvas"></canvas>
     </div>
   );

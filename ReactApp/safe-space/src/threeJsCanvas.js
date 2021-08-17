@@ -3,7 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import { io } from "socket.io-client"
 
-const client = () => {
+const threeJsCanvas = () => {
 
   let myId = "";
   let updateInterval;
@@ -153,4 +153,4 @@ const client = () => {
   tick();
 }
 
-export {client}
+export {threeJsCanvas}
