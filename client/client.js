@@ -65,6 +65,10 @@ socket.on("removePlayer", (id) => {
   delete users[id];
 });
 
+socket.on("active users ordered", (orderedUserList) => {
+  console.log(orderedUserList);
+});
+
 //
 const canvas = document.querySelector("#canvas");
 
