@@ -44,7 +44,7 @@ socket.on("joined", (id, activeUsers) => {
     users[userId] = new THREE.Mesh(
       new THREE.SphereGeometry(1),
       new THREE.MeshStandardMaterial({
-        color: userData.color,
+        color: 0xff0000,
       })
     );
     users[userId].name = userData.username;

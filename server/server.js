@@ -63,6 +63,7 @@ const updateConnectionGradients = (distanceToOtherUsers) => {
 /**
  * PHYSICS
  */
+// sphereAvatar
 const createUserAvatar = (id) => {
   const sphereShape = new CANNON.Sphere(1);
   // const sphereShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
@@ -81,7 +82,7 @@ const createUserAvatar = (id) => {
 
   return sphereBody.id;
 };
-
+// sphereUser navigation
 const force = 50;
 const navigate = (map) => {
   const appliedForce = [0, 0, 0];
@@ -91,20 +92,39 @@ const navigate = (map) => {
   if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
   return new CANNON.Vec3(...appliedForce);
 };
-const deltaPosition = 0.1;
-// const deltaRotation = 0.1;
-const navigateThroughPosition = (map) => {
-  const positionVector = [0, 0, 0];
-  // const rotationVector = [0,0,0]
-  if (map.ArrowUp) {
-    positionVector[2] = positionVector[2] - deltaPosition;
-    // positionVector[3]
-  }
-  if (map.ArrowRight) positionVector[0] = positionVector[0] + deltaPosition;
-  if (map.ArrowDown) positionVector[2] = positionVector[2] + deltaPosition;
-  if (map.ArrowLeft) positionVector[0] = positionVector[0] - deltaPosition;
-  return positionVector;
-  // return new CANNON.Vec3(...positionVector);
+// const deltaPosition = 0.1;
+// const navigateThroughPosition = (map) => {
+//   const positionVector = [0, 0, 0];
+//   if (map.ArrowUp) {
+//     positionVector[2] = positionVector[2] - deltaPosition;
+//   }
+//   if (map.ArrowRight) positionVector[0] = positionVector[0] + deltaPosition;
+//   if (map.ArrowDown) positionVector[2] = positionVector[2] + deltaPosition;
+//   if (map.ArrowLeft) positionVector[0] = positionVector[0] - deltaPosition;
+//   return positionVector;
+// };
+
+// car navigation
+const carNavigation = (map) => {
+  car.setBrake(0, 0);
+  car.setBrake(0, 1);
+  car.setBrake(0, 2);
+  car.setBrake(0, 3);
+
+  var engineForce = 800,
+    maxSteerVal = 0.3;
+  // forward
+  car.applyEngineForce(map.arrowUp ? -engineForce : 0, 2);
+  car.applyEngineForce(map.arrowUp ? -engineForce : 0, 3);
+  // backward
+  car.applyEngineForce(map.arrowUp ? engineForce : 0, 2);
+  car.applyEngineForce(map.arrowUp ? engineForce : 0, 3);
+  // right
+  car.setSteeringValue(map.arrowUp ? -maxSteerVal : 0, 2);
+  car.setSteeringValue(map.arrowUp ? -maxSteerVal : 0, 3);
+  // left
+  car.setSteeringValue(map.arrowUp ? maxSteerVal : 0, 2);
+  car.setSteeringValue(map.arrowUp ? maxSteerVal : 0, 3);
 };
 
 const physics = {
@@ -206,7 +226,6 @@ car.addToWorld(physics.world);
 
 // car wheels
 const wheelBodies = [];
-// wheelVisuals = [];
 car.wheelInfos.forEach((wheel) => {
   const shape = new CANNON.Cylinder(
     wheel.radius,
@@ -219,7 +238,6 @@ car.wheelInfos.forEach((wheel) => {
   q.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
   body.addShape(shape, new CANNON.Vec3(), q);
   wheelBodies.push(body);
-  // wheel visual body
 });
 
 // update the wheels to match the physics
@@ -232,7 +250,6 @@ const updateWheels = () => {
     wheelBodies[i].quaternion.copy(t.quaternion);
   }
 };
-console.log(car.chassisBody.quaternion);
 
 /********* */
 
