@@ -20,7 +20,7 @@ body,
   background: #272727;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, ubuntu, roboto, noto,
-    segoe ui, arial, sans-serif;
+.tileContainer {
+  position: absolute;
+  top: 0;
 }
