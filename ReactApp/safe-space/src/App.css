@@ -16,7 +16,7 @@ body,
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  /* overflow: hidden; */
+  overflow: hidden;
   background: #272727;
 }
 
