@@ -27,6 +27,50 @@ let activeUsers = {};
  */
 let userCount = 0;
 
+// proximitiy alert and connection for webRTC
+const distances = {};
+const updateDistances = (userId) => {
+  const userPosition = activeUsers[userId].position;
+  const distanceToOtherUsers = {};
+  for (const [id, data] of Object.entries(activeUsers)) {
+    if (userId !== id) {
+      distanceToOtherUsers[id] = Math.sqrt(
+        [
+          userPosition.x - data.position.x,
+          userPosition.y - data.position.y,
+          userPosition.z - data.position.z,
+        ].reduce((mag, dir) => (mag += dir ** 2), 0)
+      );
+    }
+  }
+  return distanceToOtherUsers;
+};
+const sortedListOfUsers = (distanceToOtherUsers) => {
+  // returns array of userId's sorted by dstance, ascending
+  return Object.keys(distanceToOtherUsers).sort((a, b) => {
+    return distanceToOtherUsers[a] - distanceToOtherUsers[b];
+  });
+};
+const radiusConnected = 2 * 15;
+const radiusDisconnected = 2 * 35;
+const updateConnectionGradients = (distanceToOtherUsers) => {
+  const connectionGradients = {};
+  for (const [userId, distance] of Object.entries(distanceToOtherUsers)) {
+    let gradient = 0;
+    if (distance > radiusDisconnected) {
+      gradient = 0;
+    } else if (distance > radiusConnected) {
+      gradient =
+        1 -
+        (distance - radiusConnected) / (radiusDisconnected - radiusConnected);
+    } else {
+      gradient = 1;
+    }
+    connectionGradients[userId] = gradient;
+  }
+  return connectionGradients;
+};
+
 /**
  * PHYSICS
  */
@@ -48,7 +92,7 @@ const createUserAvatar = (id) => {
   return sphereBody.id;
 };
 
-const force = 100;
+const force = 50;
 const navigate = (map) => {
   const appliedForce = [0, 0, 0];
   if (map.ArrowUp) appliedForce[2] = appliedForce[2] - force;
@@ -97,6 +141,7 @@ io.on("connection", (socket) => {
     username: `User00` + userCount++,
     position: { x: 0, y: 0, z: 0 },
     quaternion: { x: 0, y: 0, z: 0, w: 0 },
+    connectionGradients: {},
   };
   activeUsers[socket.id].bodyId = physics.createUserAvatar(socket.id);
   activeUsers[socket.id].position = physics.userBodies[socket.id].position;
@@ -110,6 +155,10 @@ io.on("connection", (socket) => {
     console.log("socket disconnected : " + socket.id);
     if (activeUsers && activeUsers[socket.id]) {
       console.log("deleting " + socket.id);
+      delete distances[socket.id];
+      for (const val of Object.values(distances)) {
+        if (val[socket.id]) delete val[socket];
+      }
       delete activeUsers[socket.id];
       physics.world.removeBody(physics.userBodies[socket.id]);
       delete physics.userBodies[socket.id];
@@ -124,25 +173,30 @@ io.on("connection", (socket) => {
         appliedForce,
         new CANNON.Vec3(0, 0, 0)
       );
+      distances[socket.id] = updateDistances(socket.id);
+      activeUsers[socket.id].connectionGradients = updateConnectionGradients(
+        distances[socket.id]
+      );
     }
   });
+  setInterval(() => {
+    if (distances[socket.id]) {
+      socket.emit(
+        "active users ordered",
+        sortedListOfUsers(distances[socket.id]).map((userId) => {
+          if (activeUsers[userId]) {
+            return activeUsers[userId].username;
+          }
+        })
+      );
+    }
+  }, 1000);
 
   setInterval(() => {
     physics.world.step(0.025);
     Object.keys(activeUsers).forEach((user) => {
       activeUsers[user].position = physics.userBodies[user].position;
       activeUsers[user].quaternion = physics.userBodies[user].quaternion;
-      // activeUsers[user].position = {
-      //   x: physics.userBodies[user].position.x,
-      //   y: physics.userBodies[user].position.y,
-      //   z: physics.userBodies[user].position.z,
-      // };
-      // activeUsers[user].quaternion = {
-      //   x: physics.userBodies[user].quaternion.x,
-      //   y: physics.userBodies[user].quaternion.y,
-      //   z: physics.userBodies[user].quaternion.z,
-      //   w: physics.userBodies[user].quaternion.w,
-      // };
     });
     socket.emit("update", activeUsers);
   }, 25);
