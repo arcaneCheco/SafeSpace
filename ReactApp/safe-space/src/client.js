@@ -70,9 +70,10 @@ const client = () => {
 
   socket.on("active users ordered", (orderedUserList) => {
     console.log(orderedUserList);
-  });
-
-  //
+  })
+    /**
+   * THREE JS STUFF
+   */
   const canvas = document.querySelector("#canvas");
 
   const scene = new THREE.Scene();
