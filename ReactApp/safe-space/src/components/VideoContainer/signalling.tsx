@@ -6,14 +6,14 @@ import Video from './Video';
 
 const Signaling = () => {
 
-  // const [socket, setSocket] = useState<SocketIOClient.Socket>();
-  // const [users, setUsers] = useState<Array<IWebRTCUser>>([]);
-  // let localVideoRef = useRef<HTMLVideoElement>(null);
+  const [socket, setSocket] = useState<SocketIOClient.Socket>();
+  const [users, setUsers] = useState<Array<IWebRTCUser>>([]);
+  let localVideoRef = useRef<HTMLVideoElement>(null);
 
-  const [socket, setSocket] = useState();
-  const [users, setUsers] = useState([]); // Array of users' data (socket id, MediaStream)
+  // const [socket, setSocket] = useState();
+  // const [users, setUsers] = useState([]); // Array of users' data (socket id, MediaStream)
 
-  let localVideoRef = useRef(null);  // ref of the video on which you want to print your MediaStream
+  // let localVideoRef = useRef(null);  // ref of the video on which you want to print your MediaStream
   let sendPC: RTCPeerConnection; // RTCPeerConnetion to send to MediaStream to the server
   let receivePCs: { [socketId: string]: RTCPeerConnection }; // List of RTCPeerConnections to receive MediaStream from other users in same room from server (receivePCs[socketid] = RTCPeerConnection)
 
@@ -141,7 +141,7 @@ const Signaling = () => {
 
   // Create an RTCPeerConnection to send your MediaStream to the server and register localStream
 
-  const createSenderPeerConnection = (newSocket, localStream: MediaStream): RTCPeerConnection => {
+  const createSenderPeerConnection = (newSocket: any, localStream: MediaStream): RTCPeerConnection => {
 
     let pc = new RTCPeerConnection(pc_config);
 
@@ -179,7 +179,7 @@ const Signaling = () => {
   // Specifies RTCSessionDescription in the localDescription of the corresponding RTCPeerConnection
   // Send RTCSessionDescription via socket to server
 
-  const createSenderOffer = async (newSocket) => {
+  const createSenderOffer = async (newSocket: any) => {
     try {
       let sdp = await sendPC.createOffer({ offerToReceiveAudio: false, offerToReceiveVideo: false });
       console.log('create sender offer success');
@@ -199,7 +199,7 @@ const Signaling = () => {
   // Created RTCPeerConnection to receive MediaStream from other users in the room
   // sends offer to the server
 
-  const createReceivePC = (id: string, newSocket) => {
+  const createReceivePC = (id: string, newSocket: any) => {
     try {
       console.log(`socketID(${id}) user entered`);
       let pc = createReceiverPeerConnection(id, newSocket);
@@ -213,7 +213,7 @@ const Signaling = () => {
   // Create RTCPeerConnection to receive MediaStream from socketID user
   // Store RTCPeerConnection created as key-value format in receivePCs variable
 
-  const createReceiverPeerConnection = (socketID: string, newSocket): RTCPeerConnection => {
+  const createReceiverPeerConnection = (socketID: string, newSocket: any): RTCPeerConnection => {
     let pc = new RTCPeerConnection(pc_config);
 
     // add pc to peerConnections object
@@ -256,7 +256,7 @@ const Signaling = () => {
   // Specifies RTCSessionDescription in the localDescription of the corresponding RTCPeerConnection
   // Send RTCSessionDescription via socket to server
 
-  const createReceiverOffer = async (pc: RTCPeerConnection, newSocket, senderSocketID: string) => {
+  const createReceiverOffer = async (pc: RTCPeerConnection, newSocket: any, senderSocketID: string) => {
     try {
       // change createOffer to createAnswer?
       let sdp = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
