@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Styled from 'styled-components';
 
 
-const Container = Styled.div`
+const ContainerStyled = Styled.div`
    position: relative;
    display: inline-block;
    width: 240px;
@@ -10,7 +10,7 @@ const Container = Styled.div`
    margin: 5px;
 `;
 
-const VideoContainer = Styled.video`
+const VideoContainerStyled = Styled.video`
    width: 240px;
    height: 240px;
    background-color: black;
@@ -31,13 +31,13 @@ const Video = ({ stream, muted }: Props) => {
   })
 
   return (
-    <Container>
-      <VideoContainer
+    <ContainerStyled>
+      <VideoContainerStyled
         ref={ref}
         muted={isMuted}
         autoPlay
-      ></VideoContainer>
-    </Container>
+      ></VideoContainerStyled>
+    </ContainerStyled>
   );
 }
 
