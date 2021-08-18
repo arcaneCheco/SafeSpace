@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
-import { io } from "socket.io-client"
-import { aWonderfulWorld } from './aWonderfulWorld'
+import { io } from "socket.io-client";
+import { aWonderfulWorld } from "./aWonderfulWorld";
+import Visuals from "./visuals";
 
 const threeJsCanvas = () => {
-
   let myId = "";
   let updateInterval;
   const users = {};
@@ -71,8 +71,8 @@ const threeJsCanvas = () => {
 
   socket.on("active users ordered", (orderedUserList) => {
     // console.log(orderedUserList);
-  })
-    /**
+  });
+  /**
    * THREE JS STUFF
    */
   const canvas = document.querySelector("#canvas");
@@ -80,6 +80,6 @@ const threeJsCanvas = () => {
   const scene = new THREE.Scene();
 
   aWonderfulWorld(scene, canvas);
-}
+};
 
-export {threeJsCanvas}
+export { threeJsCanvas };

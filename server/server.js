@@ -1,9 +1,9 @@
 const express = require("express");
 const socketIO = require("socket.io");
 const CANNON = require("cannon-es");
-const wrtc = require("webrtc");
+const Physics = require("./physics");
 
-const PORT = 3002;
+const PORT = 3001;
 const app = express();
 
 const server = app.listen(PORT, () => {
@@ -13,10 +13,6 @@ const server = app.listen(PORT, () => {
     console.log(err);
   }
 });
-
-
-
-/*****************/
 
 let activeUsers = {};
 let userCount = 0;
@@ -65,151 +61,13 @@ const updateConnectionGradients = (distanceToOtherUsers) => {
   return connectionGradients;
 };
 
-/**
- * PHYSICS
- */
-// sphereAvatar
-const createUserAvatar = (id) => {
-  const sphereShape = new CANNON.Sphere(1);
-  // const sphereShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
-  const sphereBody = new CANNON.Body({
-    mass: 1,
-    material: physics.userMaterial,
-    angularDamping: 0.9,
-  });
-  sphereBody.addShape(sphereShape);
-  sphereBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
-  sphereBody.position.y = 5;
-  (sphereBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5),
-    physics.world.addBody(sphereBody);
-
-  physics.userBodies[id] = sphereBody;
-
-  return sphereBody.id;
-};
-// sphereUser navigation
-const force = 50;
-const navigate = (map) => {
-  const appliedForce = [0, 0, 0];
-  if (map.ArrowUp) appliedForce[2] = appliedForce[2] - force;
-  if (map.ArrowRight) appliedForce[0] = appliedForce[0] + force;
-  if (map.ArrowDown) appliedForce[2] = appliedForce[2] + force;
-  if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
-  return new CANNON.Vec3(...appliedForce);
-};
-// const deltaPosition = 0.1;
-// const navigateThroughPosition = (map) => {
-//   const positionVector = [0, 0, 0];
-//   if (map.ArrowUp) {
-//     positionVector[2] = positionVector[2] - deltaPosition;
-//   }
-//   if (map.ArrowRight) positionVector[0] = positionVector[0] + deltaPosition;
-//   if (map.ArrowDown) positionVector[2] = positionVector[2] + deltaPosition;
-//   if (map.ArrowLeft) positionVector[0] = positionVector[0] - deltaPosition;
-//   return positionVector;
-// };
-
-// car navigation
-const carNavigation = (map) => {
-  if (!map.ArrowUp && !map.ArrowDown && !map.ArrowRight && !map.ArrowLeft) {
-    car.setBrake(10, 2);
-    car.setBrake(10, 3);
-  }
-  const engineForce = 800;
-  const maxSteerVal = 0.3;
-  if (map.ArrowUp) {
-    car.applyEngineForce(engineForce, 2);
-    car.applyEngineForce(engineForce, 3);
-  } else {
-    car.applyEngineForce(0, 2);
-    car.applyEngineForce(0, 3);
-  }
-  if (map.ArrowDown) {
-    car.applyEngineForce(-engineForce, 2);
-    car.applyEngineForce(-engineForce, 3);
-  }
-  if (map.ArrowRight) {
-    car.setSteeringValue(maxSteerVal, 2);
-    car.setSteeringValue(maxSteerVal, 3);
-  } else {
-    car.setSteeringValue(0, 2);
-    car.setSteeringValue(0, 3);
-  }
-  if (map.ArrowLeft) {
-    car.setSteeringValue(-maxSteerVal, 2);
-    car.setSteeringValue(-maxSteerVal, 3);
-  }
-  // forward
-  // car.applyEngineForce(map.ArrowUp ? -engineForce : 0, 2);
-  // car.applyEngineForce(map.ArrowUp ? -engineForce : 0, 3);
-  // // backward
-  // car.applyEngineForce(map.ArrowDown ? engineForce : 0, 2);
-  // car.applyEngineForce(map.ArrowDown ? engineForce : 0, 3);
-  // // right
-  // car.setSteeringValue(map.ArrowRight ? -maxSteerVal : 0, 2);
-  // car.setSteeringValue(map.ArrowRight ? -maxSteerVal : 0, 3);
-  // // left
-  // car.setSteeringValue(map.ArrowLeft ? maxSteerVal : 0, 2);
-  // car.setSteeringValue(map.ArrowLeft ? maxSteerVal : 0, 3);
-};
-
-const physics = {
-  world: new CANNON.World(),
-  userBodies: {},
-  groundMaterial: new CANNON.Material("groundMaterial"),
-  userMaterial: new CANNON.Material("userMaterial"),
-  wheelMaterial: new CANNON.Material("wheelMaterial"),
-  createUserAvatar: createUserAvatar,
-};
-physics.world.broadphase = new CANNON.SAPBroadphase(physics.world);
-physics.world.gravity.set(0, -9.81, 0);
-physics.world.allowSleep = true;
-
-physics.groundMaterial.friction = 0.15;
-physics.groundMaterial.restitution = 0.25;
-physics.userMaterial.friction = 0.15;
-physics.userMaterial.restitution = 0.25;
-wheelGroundContactMaterial = new CANNON.ContactMaterial(
-  physics.wheelMaterial,
-  physics.groundMaterial,
-  {
-    friction: 0.3,
-    restitution: 0,
-    contactEquationStiffness: 1000,
-  }
-);
-// physics.world.defaultContactMaterial.friction = 0;
-physics.world.addContactMaterial(wheelGroundContactMaterial);
-
-// const userGroundContactMaterial = new CANNON.ContactMaterial(
-//   physics.userMaterial,
-//   physics.groundMaterial,
-//   {
-//     friction: 0,
-//     restitution: 0.1,
-//     contactEquationStiffness: 1000,
-//   }
-// );
-// physics.world.addContactMaterial(userGroundContactMaterial);
-
-const groundShape = new CANNON.Box(new CANNON.Vec3(50, 1, 50));
-const groundBody = new CANNON.Body({
-  mass: 0,
-  material: this.groundMaterial,
-});
-groundBody.addShape(groundShape);
-groundBody.position.x = 0;
-groundBody.position.y = -1;
-groundBody.position.z = 0;
-physics.world.addBody(groundBody);
-
-
-
 const io = socketIO(server, {
   cors: {
     origin: "*",
   },
 });
+
+const physics = new Physics();
 
 io.on("connection", (socket) => {
   console.log("a user connected : " + socket.id);
@@ -219,16 +77,16 @@ io.on("connection", (socket) => {
     quaternion: { x: 0, y: 0, z: 0, w: 0 },
     connectionGradients: {},
   };
-  activeUsers[socket.id].bodyId = physics.createUserAvatar(socket.id);
+  activeUsers[socket.id].bodyId = physics.createAndAddSphereAvatar(socket.id);
   activeUsers[socket.id].position = physics.userBodies[socket.id].position;
 
-  activeUsers[socket.id].color =
-    "#" + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6);
+  //   activeUsers[socket.id].color =
+  //     "#" + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6);
 
   socket.emit("joined", socket.id, activeUsers);
   socket.broadcast.emit("add new user", socket.id, activeUsers[socket.id]);
 
-  activeUsers[socket.id].bodyId = physics.createUserAvatar(socket.id);
+  activeUsers[socket.id].bodyId = physics.createAndAddSphereAvatar(socket.id);
 
   socket.on("disconnect", () => {
     console.log("socket disconnected : " + socket.id);
@@ -245,11 +103,18 @@ io.on("connection", (socket) => {
     }
   });
 
+  physics.addBoxGround();
+  // create Car
+  const chassisBody = physics.createCarChassis();
+  const car = physics.createCar(chassisBody, 0.7);
+  car.addToWorld(physics.world);
+  const wheelBodies = physics.createWheelBodies(car);
+
   let carControl;
   socket.on("update", (map, controlModes) => {
     if (controlModes.carControl) {
       carControl = true;
-      carNavigation(map);
+      physics.carNavigation(car, map);
     } else {
       if (activeUsers[socket.id]) {
         const appliedForce = navigate(map);
@@ -257,10 +122,6 @@ io.on("connection", (socket) => {
           appliedForce,
           new CANNON.Vec3(0, 0, 0)
         );
-        // const positionVector = navigateThroughPosition(map);
-        // physics.userBodies[socket.id].position.x += positionVector[0];
-        // physics.userBodies[socket.id].position.y += positionVector[1];
-        // physics.userBodies[socket.id].position.z += positionVector[2];
         distances[socket.id] = updateDistances(socket.id);
         activeUsers[socket.id].connectionGradients = updateConnectionGradients(
           distances[socket.id]
@@ -269,6 +130,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // send sorted list of usernames to client
   setInterval(() => {
     if (distances[socket.id]) {
       socket.emit(
@@ -289,7 +151,7 @@ io.on("connection", (socket) => {
       activeUsers[user].quaternion = physics.userBodies[user].quaternion;
     });
     if (carControl) {
-      updateWheels();
+      physics.updateCarWheels(car, wheelBodies);
       socket.emit(
         "update wheels",
         wheelBodies.map((wheel) => ({
