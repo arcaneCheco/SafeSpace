@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import Video from './Video';
 
 
-const Signalling = () => {
+const Signalling: React.FC = () => {
 
   const [socket, setSocket] = useState<any>();
   const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
@@ -40,10 +40,7 @@ const Signalling = () => {
 
     // Generates RTC PeerConnection to receive MediaStream fromm those users, sends to server
     newSocket.on('allUsers', (data: { users: Array<{ id: string }> }) => {
-      let len = data.users.length;
-      for (let i = 0; i < len; i++) {
-        createReceivePC(data.users[i].id, newSocket);
-      }
+      data.users.forEach(user => createReceivePC(user.id, newSocket));
     });
 
     // Close RTCPeerConnection that you connected to receive MediaStream for that user, then delete it from list
