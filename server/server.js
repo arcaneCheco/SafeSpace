@@ -4,6 +4,7 @@ const wrtc = require("webrtc");
 const CANNON = require("cannon-es");
 const Physics = require("./physics");
 const wrtcSockets = require("./sockets/wrtc.sockets");
+const webrtcsocketlogic = require("./sockets/wrtc.sockets");
 
 
 const PORT = 3002;
@@ -16,6 +17,14 @@ const server = app.listen(PORT, () => {
     console.log(err);
   }
 });
+
+const io = socketIO(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+webrtcsocketlogic(io);
 
 let activeUsers = {};
 let userCount = 0;
@@ -64,11 +73,7 @@ const updateConnectionGradients = (distanceToOtherUsers) => {
   return connectionGradients;
 };
 
-const io = socketIO(server, {
-  cors: {
-    origin: "*",
-  },
-});
+
 
 const physics = new Physics();
 

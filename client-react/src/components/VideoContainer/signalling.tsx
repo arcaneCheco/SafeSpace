@@ -33,6 +33,10 @@ const Signalling: React.FC = () => {
     let newSocket = io('http://localhost:8080');
     let localStream: MediaStream;
 
+    // newSocket.on('connection', () => {
+    //   console.log('connection');
+    // });
+
     // Generates RTCPeerConnection to receive MediaStream then sent to server (needs to be in userJoined in client.js)
     newSocket.on('userEnter', (data: { id: string }) => {
       createReceivePC(data.id, newSocket);
