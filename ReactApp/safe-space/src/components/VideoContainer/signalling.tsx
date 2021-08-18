@@ -1,11 +1,8 @@
-/// LAST NIGHT
-
 import React, { useState } from 'react';
-import io from 'socket-io';
+import io from 'socket.io-client';
 import { useRef } from 'react';
 import { useEffect } from 'react';
-import Video from './video';
-import { Socket } from 'net';
+import Video from './Video';
 
 const Signaling = () => {
 
@@ -35,7 +32,7 @@ const Signaling = () => {
   }
 
   useEffect(() => {
-    let newSocket = io.connect('http://localhost:8080');
+    let newSocket = io('http://localhost:8080');
     let localStream: MediaStream;
 
     // Generates RTCPeerConnection to receive MediaStream then sent to server (needs to be in userJoined in client.js)
@@ -178,7 +175,7 @@ const Signaling = () => {
     return pc;
   }
 
-  // Create an offer of RTCPeerConnection to send your MediaStream to the server
+  // Create an offer of RTCPeerConnection to send MediaStream to the server
   // Specifies RTCSessionDescription in the localDescription of the corresponding RTCPeerConnection
   // Send RTCSessionDescription via socket to server
 
@@ -255,11 +252,10 @@ const Signaling = () => {
     return pc;
   }
 
-  // Create an offer of RTCPeerConnection to receive your MediaStream to the server
+  // Create an offer of RTCPeerConnection to receive MediaStream from server
   // Specifies RTCSessionDescription in the localDescription of the corresponding RTCPeerConnection
   // Send RTCSessionDescription via socket to server
 
-  // change createReceiverOffer to createAnswerOffer?
   const createReceiverOffer = async (pc: RTCPeerConnection, newSocket, senderSocketID: string) => {
     try {
       // change createOffer to createAnswer?
