@@ -106,25 +106,46 @@ const navigate = (map) => {
 
 // car navigation
 const carNavigation = (map) => {
-  car.setBrake(0, 0);
-  car.setBrake(0, 1);
-  car.setBrake(0, 2);
-  car.setBrake(0, 3);
-
-  var engineForce = 800,
-    maxSteerVal = 0.3;
+  if (!map.ArrowUp && !map.ArrowDown && !map.ArrowRight && !map.ArrowLeft) {
+    car.setBrake(10, 2);
+    car.setBrake(10, 3);
+  }
+  const engineForce = 800;
+  const maxSteerVal = 0.3;
+  if (map.ArrowUp) {
+    car.applyEngineForce(engineForce, 2);
+    car.applyEngineForce(engineForce, 3);
+  } else {
+    car.applyEngineForce(0, 2);
+    car.applyEngineForce(0, 3);
+  }
+  if (map.ArrowDown) {
+    car.applyEngineForce(-engineForce, 2);
+    car.applyEngineForce(-engineForce, 3);
+  }
+  if (map.ArrowRight) {
+    car.setSteeringValue(maxSteerVal, 2);
+    car.setSteeringValue(maxSteerVal, 3);
+  } else {
+    car.setSteeringValue(0, 2);
+    car.setSteeringValue(0, 3);
+  }
+  if (map.ArrowLeft) {
+    car.setSteeringValue(-maxSteerVal, 2);
+    car.setSteeringValue(-maxSteerVal, 3);
+  }
   // forward
-  car.applyEngineForce(map.arrowUp ? -engineForce : 0, 2);
-  car.applyEngineForce(map.arrowUp ? -engineForce : 0, 3);
-  // backward
-  car.applyEngineForce(map.arrowUp ? engineForce : 0, 2);
-  car.applyEngineForce(map.arrowUp ? engineForce : 0, 3);
-  // right
-  car.setSteeringValue(map.arrowUp ? -maxSteerVal : 0, 2);
-  car.setSteeringValue(map.arrowUp ? -maxSteerVal : 0, 3);
-  // left
-  car.setSteeringValue(map.arrowUp ? maxSteerVal : 0, 2);
-  car.setSteeringValue(map.arrowUp ? maxSteerVal : 0, 3);
+  // car.applyEngineForce(map.ArrowUp ? -engineForce : 0, 2);
+  // car.applyEngineForce(map.ArrowUp ? -engineForce : 0, 3);
+  // // backward
+  // car.applyEngineForce(map.ArrowDown ? engineForce : 0, 2);
+  // car.applyEngineForce(map.ArrowDown ? engineForce : 0, 3);
+  // // right
+  // car.setSteeringValue(map.ArrowRight ? -maxSteerVal : 0, 2);
+  // car.setSteeringValue(map.ArrowRight ? -maxSteerVal : 0, 3);
+  // // left
+  // car.setSteeringValue(map.ArrowLeft ? maxSteerVal : 0, 2);
+  // car.setSteeringValue(map.ArrowLeft ? maxSteerVal : 0, 3);
 };
 
 const physics = {
@@ -143,7 +164,7 @@ physics.groundMaterial.friction = 0.15;
 physics.groundMaterial.restitution = 0.25;
 physics.userMaterial.friction = 0.15;
 physics.userMaterial.restitution = 0.25;
-physics.wheelGroundContactMaterial = new CANNON.ContactMaterial(
+wheelGroundContactMaterial = new CANNON.ContactMaterial(
   physics.wheelMaterial,
   physics.groundMaterial,
   {
@@ -152,7 +173,8 @@ physics.wheelGroundContactMaterial = new CANNON.ContactMaterial(
     contactEquationStiffness: 1000,
   }
 );
-physics.world.addContactMaterial(physics.wheelGroundContactMaterial);
+// physics.world.defaultContactMaterial.friction = 0;
+physics.world.addContactMaterial(wheelGroundContactMaterial);
 
 // const userGroundContactMaterial = new CANNON.ContactMaterial(
 //   physics.userMaterial,
@@ -177,9 +199,8 @@ groundBody.position.z = 0;
 physics.world.addBody(groundBody);
 
 /****car */
-let carControls = false;
-chassisShape = new CANNON.Box(new CANNON.Vec3(1, 0.3, 2));
-chassisBody = new CANNON.Body({ mass: 150 });
+const chassisShape = new CANNON.Box(new CANNON.Vec3(1, 0.3, 2));
+const chassisBody = new CANNON.Body({ mass: 150 });
 chassisBody.addShape(chassisShape);
 chassisBody.position.set(0, 0.2, 0);
 chassisBody.angularVelocity.set(0, 0, 0); // initial velocity
@@ -242,9 +263,9 @@ car.wheelInfos.forEach((wheel) => {
 
 // update the wheels to match the physics
 const updateWheels = () => {
-  for (var i = 0; i < vehicle.wheelInfos.length; i++) {
-    vehicle.updateWheelTransform(i);
-    var t = vehicle.wheelInfos[i].worldTransform;
+  for (let i = 0; i < car.wheelInfos.length; i++) {
+    car.updateWheelTransform(i);
+    const t = car.wheelInfos[i].worldTransform;
     // update wheel physics
     wheelBodies[i].position.copy(t.position);
     wheelBodies[i].quaternion.copy(t.quaternion);
@@ -295,23 +316,30 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("update", (map) => {
-    if (activeUsers[socket.id]) {
-      const appliedForce = navigate(map);
-      physics.userBodies[socket.id].applyForce(
-        appliedForce,
-        new CANNON.Vec3(0, 0, 0)
-      );
-      // const positionVector = navigateThroughPosition(map);
-      // physics.userBodies[socket.id].position.x += positionVector[0];
-      // physics.userBodies[socket.id].position.y += positionVector[1];
-      // physics.userBodies[socket.id].position.z += positionVector[2];
-      distances[socket.id] = updateDistances(socket.id);
-      activeUsers[socket.id].connectionGradients = updateConnectionGradients(
-        distances[socket.id]
-      );
+  let carControl;
+  socket.on("update", (map, controlModes) => {
+    if (controlModes.carControl) {
+      carControl = true;
+      carNavigation(map);
+    } else {
+      if (activeUsers[socket.id]) {
+        const appliedForce = navigate(map);
+        physics.userBodies[socket.id].applyForce(
+          appliedForce,
+          new CANNON.Vec3(0, 0, 0)
+        );
+        // const positionVector = navigateThroughPosition(map);
+        // physics.userBodies[socket.id].position.x += positionVector[0];
+        // physics.userBodies[socket.id].position.y += positionVector[1];
+        // physics.userBodies[socket.id].position.z += positionVector[2];
+        distances[socket.id] = updateDistances(socket.id);
+        activeUsers[socket.id].connectionGradients = updateConnectionGradients(
+          distances[socket.id]
+        );
+      }
     }
   });
+
   setInterval(() => {
     if (distances[socket.id]) {
       socket.emit(
@@ -331,14 +359,18 @@ io.on("connection", (socket) => {
       activeUsers[user].position = physics.userBodies[user].position;
       activeUsers[user].quaternion = physics.userBodies[user].quaternion;
     });
-    if (carControls) {
+    if (carControl) {
       updateWheels();
       socket.emit(
         "update wheels",
         wheelBodies.map((wheel) => ({
           position: wheel.position,
           quaternion: wheel.quaternion,
-        }))
+        })),
+        {
+          position: chassisBody.position,
+          quaternion: chassisBody.quaternion,
+        }
       );
     }
     socket.emit("update", activeUsers);

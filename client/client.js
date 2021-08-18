@@ -5,6 +5,10 @@ import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 let myId = "";
 let updateInterval;
 const users = {};
+const controlModes = {
+  sphereUserControl: false,
+  carControl: true,
+};
 
 /**
  * UI
@@ -52,7 +56,7 @@ socket.on("joined", (id, activeUsers) => {
     scene.add(users[userId]);
   }
   updateInterval = setInterval(() => {
-    socket.emit("update", map);
+    socket.emit("update", map, controlModes);
   }, 50);
 });
 socket.on("add new user", (id, newUser) => {
@@ -160,8 +164,8 @@ const carMaterial = new THREE.MeshBasicMaterial({
 });
 const carMesh = new THREE.Mesh(carGeometry, carMaterial);
 // inital position
-carMesh.position.set(0, 0.2, 0);
-carMesh.quaternion.set(0, 0, 0, 1);
+// carMesh.position.set(0, 0.2, 0);
+// carMesh.quaternion.set(0, 0, 0, 1);
 scene.add(carMesh);
 // car wheels
 const wheels = [];
@@ -184,12 +188,21 @@ for (let i = 0; i < 4; i++) {
   wheels.push(wheelMesh);
   scene.add(wheelMesh);
 }
-socket.on("update wheels", (wheelsState, index) => {
-  wheels[i].position.copy(wheelsState[i].position);
-  wheels[i].quaternion.copy(wheelsState[i].quaternion);
+socket.on("update wheels", (wheelsState, carState) => {
+  // console.log(carState.position);
+  // console.log(map);
+  carMesh.position.copy(carState.position);
+  carMesh.quaternion.copy(carState.quaternion);
+  for (let i = 0; i < wheelsState.length; i++) {
+    wheels[i].position.copy(wheelsState[i].position);
+    wheels[i].quaternion.copy(wheelsState[i].quaternion);
+  }
 });
 
 /************ */
+let manualControl = true; // make this a click down event to enable orbit controls
+// document.onmousedown = () => (manualControl = true);
+// document.onmouseup = () => (manualControl = false);
 
 const clock = new THREE.Clock();
 const tick = () => {
@@ -199,7 +212,7 @@ const tick = () => {
   controls.update();
 
   // update camera
-  if (myId && users[myId]) {
+  if (myId && users[myId] && !manualControl) {
     let offset = new THREE.Vector3(
       users[myId].position.x + 2,
       users[myId].position.y + 20,
