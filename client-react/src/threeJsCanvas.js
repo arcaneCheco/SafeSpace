@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import { io } from "socket.io-client";
 import Visuals from "./visuals";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
 export default function threeJsCanvas() {
   const canvas = document.querySelector("#canvas");
@@ -15,6 +17,18 @@ export default function threeJsCanvas() {
   };
 
   const gui = new GUI();
+
+  //models
+  let avatar = null;
+  visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
+    const mixer = new THREE.AnimationMixer(gltf.scene);
+    const action = mixer.clipAction(gltf.animations[0]);
+    console.log(gltf);
+    const mesh = gltf.scene.children[0];
+    mesh.scale.set(4, 4, 4);
+    visuals.scene.add(mesh);
+    avatar = { action, mesh, mixer };
+  });
 
   const map = {};
   document.onkeydown = document.onkeyup = (e) => {
@@ -123,8 +137,11 @@ export default function threeJsCanvas() {
   // document.onmouseup = () => (manualControl = false);
 
   const clock = new THREE.Clock();
+  let oldElapsedTime = 0;
   const tick = () => {
     const elapsedTime = clock.getElapsedTime();
+    const deltaTime = elapsedTime - oldElapsedTime;
+    oldElapsedTime = elapsedTime;
 
     // Update controls
     visuals.orbitControls.update();
@@ -132,6 +149,10 @@ export default function threeJsCanvas() {
     // update camera
     if (myId && users[myId] && !manualControl) {
       visuals.updateAvatarModeCamera(users[myId]);
+    }
+    //update animaations
+    if (avatar && avatar.mixer) {
+      avatar.mixer.update(deltaTime);
     }
 
     // Render

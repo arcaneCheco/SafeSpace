@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
 export default class Visuals {
   constructor(canvas) {
@@ -25,6 +27,8 @@ export default class Visuals {
     this.renderer = new THREE.WebGLRenderer({ canvas });
     this.configRenderer();
     this.createGround();
+    this.setDRACOLoader();
+    this.setGLTFLoader();
   }
   configRenderer() {
     this.renderer.shadowMap.enabled = true;
@@ -44,6 +48,14 @@ export default class Visuals {
     // Update renderer
     this.renderer.setSize(this.sizes.width, this.sizes.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  }
+  setDRACOLoader() {
+    this.dracoLoader = new DRACOLoader();
+    this.dracoLoader.setDecoderPath("/draco/");
+  }
+  setGLTFLoader() {
+    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader.setDRACOLoader(this.dracoLoader);
   }
   createGround() {
     const ground = new THREE.Mesh(
