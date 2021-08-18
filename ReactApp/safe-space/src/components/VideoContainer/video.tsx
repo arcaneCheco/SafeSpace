@@ -22,8 +22,11 @@ interface Props {
 }
 
 const Video = ({ stream, muted }: Props) => {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
+  // const ref = useRef<HTMLVideoElement>(null);
+  // const [isMuted, setIsMuted] = useState<boolean>(false);
+
+  const ref = useRef(null);
+  const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
     if (ref.current) ref.current.srcObject = stream;
