@@ -1,24 +1,18 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import { io } from "socket.io-client";
-import { aWonderfulWorld } from "./aWonderfulWorld";
 import Visuals from "./visuals";
 
 export default function threeJsCanvas() {
+  const canvas = document.querySelector("#canvas");
+  const visuals = new Visuals(canvas);
   let myId = "";
   let updateInterval;
   const users = {};
   const controlModes = {
-    sphereUserControl: false,
-    carControl: true,
+    sphereUserControl: true,
+    carControl: false,
   };
-
-  /**
-   * UI
-   */
-
-  /******************* */
 
   const gui = new GUI();
 
@@ -49,12 +43,7 @@ export default function threeJsCanvas() {
   socket.on("joined", (id, activeUsers) => {
     myId = id;
     for (const [userId, userData] of Object.entries(activeUsers)) {
-      users[userId] = new THREE.Mesh(
-        new THREE.SphereGeometry(1),
-        new THREE.MeshStandardMaterial({
-          color: 0xff0000,
-        })
-      );
+      users[userId] = visuals.createSphereAvatar();
       users[userId].name = userData.username;
       users[userId].position.copy(userData.position);
       visuals.scene.add(users[userId]);
@@ -64,10 +53,7 @@ export default function threeJsCanvas() {
     }, 50);
   });
   socket.on("add new user", (id, newUser) => {
-    users[id] = new THREE.Mesh(
-      new THREE.SphereGeometry(1),
-      new THREE.MeshStandardMaterial({ color: 0xff0000 })
-    );
+    users[id] = visuals.createSphereAvatar();
     users[id].name = newUser.username;
     users[id].position.copy(newUser.position);
     visuals.scene.add(users[id]);
@@ -91,10 +77,6 @@ export default function threeJsCanvas() {
   //   console.log(orderedUserList);
   // });
 
-  //**three.js */
-  const canvas = document.querySelector("#canvas");
-  const visuals = new Visuals(canvas);
-  console.log(visuals);
   //
 
   /**
@@ -116,8 +98,8 @@ export default function threeJsCanvas() {
   // car
   const carMesh = visuals.createCarMesh();
   // inital position
-  // carMesh.position.set(0, 0.2, 0);
-  // carMesh.quaternion.set(0, 0, 0, 1);
+  carMesh.position.set(0, 0.2, 0);
+  carMesh.quaternion.set(0, 0, 0, 1);
   visuals.scene.add(carMesh);
   // car wheels
   const wheels = visuals.createWheels();
@@ -136,7 +118,7 @@ export default function threeJsCanvas() {
   });
 
   /************ */
-  let manualControl = true; // make this a click down event to enable orbit controls
+  let manualControl = false; // make this a click down event to enable orbit controls
   // document.onmousedown = () => (manualControl = true);
   // document.onmouseup = () => (manualControl = false);
 
@@ -149,14 +131,7 @@ export default function threeJsCanvas() {
 
     // update camera
     if (myId && users[myId] && !manualControl) {
-      let offset = new THREE.Vector3(
-        users[myId].position.x + 2,
-        users[myId].position.y + 20,
-        users[myId].position.z + 20
-      );
-      visuals.camera.position.lerp(offset, 0.2);
-      visuals.camera.position.copy(offset);
-      visuals.camera.lookAt(users[myId].position);
+      visuals.updateAvatarModeCamera(users[myId]);
     }
 
     // Render

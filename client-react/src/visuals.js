@@ -84,4 +84,22 @@ export default class Visuals {
     }
     return wheels;
   }
+  updateAvatarModeCamera(target) {
+    let offset = new THREE.Vector3(
+      target.position.x + 2,
+      target.position.y + 20,
+      target.position.z + 20
+    );
+    this.camera.position.lerp(offset, 0.2);
+    this.camera.position.copy(offset);
+    this.camera.lookAt(target.position);
+  }
+  createSphereAvatar() {
+    return new THREE.Mesh(
+      new THREE.SphereGeometry(1),
+      new THREE.MeshStandardMaterial({
+        color: 0xff0000,
+      })
+    );
+  }
 }

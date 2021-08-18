@@ -159,6 +159,15 @@ class Physics {
       car.setSteeringValue(-maxSteerVal, 3);
     }
   }
+  navigateSphereAvatar(map) {
+    const force = 50;
+    const appliedForce = [0, 0, 0];
+    if (map.ArrowUp) appliedForce[2] = appliedForce[2] - force;
+    if (map.ArrowRight) appliedForce[0] = appliedForce[0] + force;
+    if (map.ArrowDown) appliedForce[2] = appliedForce[2] + force;
+    if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
+    return new CANNON.Vec3(...appliedForce);
+  }
 }
 module.exports = Physics;
 // const physics = new Physics();

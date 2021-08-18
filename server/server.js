@@ -117,7 +117,7 @@ io.on("connection", (socket) => {
       physics.carNavigation(car, map);
     } else {
       if (activeUsers[socket.id]) {
-        const appliedForce = navigate(map);
+        const appliedForce = physics.navigateSphereAvatar(map);
         physics.userBodies[socket.id].applyForce(
           appliedForce,
           new CANNON.Vec3(0, 0, 0)
