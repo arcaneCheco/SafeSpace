@@ -4,16 +4,14 @@ import { useRef } from 'react';
 import { useEffect } from 'react';
 import Video from './Video';
 
-const Signaling = () => {
 
-  const [socket, setSocket] = useState<SocketIOClient.Socket>();
-  const [users, setUsers] = useState<Array<IWebRTCUser>>([]);
-  let localVideoRef = useRef<HTMLVideoElement>(null);
+const Signalling = () => {
 
-  // const [socket, setSocket] = useState();
-  // const [users, setUsers] = useState([]); // Array of users' data (socket id, MediaStream)
+  const [socket, setSocket] = useState<any>();
+  const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
 
-  // let localVideoRef = useRef(null);  // ref of the video on which you want to print your MediaStream
+  let localVideoRef = useRef<HTMLVideoElement>(null); // ref of the video on which you want to print your MediaStream
+
   let sendPC: RTCPeerConnection; // RTCPeerConnetion to send to MediaStream to the server
   let receivePCs: { [socketId: string]: RTCPeerConnection }; // List of RTCPeerConnections to receive MediaStream from other users in same room from server (receivePCs[socketid] = RTCPeerConnection)
 
@@ -302,6 +300,5 @@ const Signaling = () => {
   );
 }
 
-export default Signaling;
-
+export default Signalling;
 

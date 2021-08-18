@@ -1,4 +1,4 @@
-interface IWebRTCUser {
+export interface IWebRTCUser {
   id: string;
   stream: MediaStream;
 }

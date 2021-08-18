@@ -3,7 +3,7 @@ const socketIO = require("socket.io");
 const CANNON = require("cannon-es");
 const Physics = require("./physics");
 
-const PORT = 3001;
+const PORT = 3002;
 const app = express();
 
 const server = app.listen(PORT, () => {

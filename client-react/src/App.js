@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
-import { threeJsCanvas } from "./threeJsCanvas";
+// import { threeJsCanvas } from "./threeJsCanvas";
 import VideoContainer from "./components/VideoContainer/VideoContainer";
 
 const App = () => {
-  useEffect(() => {
-    threeJsCanvas();
-  }, []);
+  // useEffect(() => {
+  //   threeJsCanvas();
+  // }, []);
 
   return (
     <div>
