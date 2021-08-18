@@ -5,6 +5,18 @@ import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 let myId = "";
 let updateInterval;
 const users = {};
+const controlModes = {
+  sphereUserControl: false,
+  carControl: true,
+};
+
+/**
+ * UI
+ */
+
+/******************* */
+
+const gui = new GUI();
 
 const map = {};
 document.onkeydown = document.onkeyup = (e) => {
@@ -24,20 +36,27 @@ const socket = io("http://localhost:3001");
 socket.on("connect", () => {
   console.log("connect");
 });
+window.onbeforeunload = () => {
+  for (const userId of Object.keys(users)) {
+    delete users[userId];
+  }
+  socket.disconnect();
+};
 socket.on("joined", (id, activeUsers) => {
   myId = id;
-  console.log(activeUsers);
   for (const [userId, userData] of Object.entries(activeUsers)) {
     users[userId] = new THREE.Mesh(
       new THREE.SphereGeometry(1),
-      new THREE.MeshStandardMaterial({ color: 0xff0000 })
+      new THREE.MeshStandardMaterial({
+        color: 0xff0000,
+      })
     );
     users[userId].name = userData.username;
     users[userId].position.copy(userData.position);
     scene.add(users[userId]);
   }
   updateInterval = setInterval(() => {
-    socket.emit("update", map);
+    socket.emit("update", map, controlModes);
   }, 50);
 });
 socket.on("add new user", (id, newUser) => {
@@ -65,9 +84,9 @@ socket.on("removePlayer", (id) => {
   delete users[id];
 });
 
-socket.on("active users ordered", (orderedUserList) => {
-  console.log(orderedUserList);
-});
+// socket.on("active users ordered", (orderedUserList) => {
+//   console.log(orderedUserList);
+// });
 
 //
 const canvas = document.querySelector("#canvas");
@@ -112,7 +131,8 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(0, 6, 6);
+camera.position.set(0, 12, 12);
+camera.lookAt(new THREE.Vector3(0, 2, -4));
 scene.add(camera);
 
 // Controls
@@ -136,9 +156,72 @@ const ground = new THREE.Mesh(
 ground.rotateX(-Math.PI / 2);
 scene.add(ground);
 
+// car
+const carGeometry = new THREE.BoxGeometry(2, 0.6, 4); // double chasis shape
+const carMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffff00,
+  side: THREE.DoubleSide,
+});
+const carMesh = new THREE.Mesh(carGeometry, carMaterial);
+// inital position
+// carMesh.position.set(0, 0.2, 0);
+// carMesh.quaternion.set(0, 0, 0, 1);
+scene.add(carMesh);
+// car wheels
+const wheels = [];
+for (let i = 0; i < 4; i++) {
+  const wheelRadius = 0.3;
+  const wheelGeometry = new THREE.CylinderGeometry(
+    wheelRadius,
+    wheelRadius,
+    0.4,
+    32
+  );
+  const wheelMaterial = new THREE.MeshPhongMaterial({
+    color: 0xd0901d,
+    emissive: 0xaa0000,
+    side: THREE.DoubleSide,
+    flatShading: true,
+  });
+  const wheelMesh = new THREE.Mesh(wheelGeometry, wheelMaterial);
+  wheelMesh.geometry.rotateZ(Math.PI / 2);
+  wheels.push(wheelMesh);
+  scene.add(wheelMesh);
+}
+socket.on("update wheels", (wheelsState, carState) => {
+  // console.log(carState.position);
+  // console.log(map);
+  carMesh.position.copy(carState.position);
+  carMesh.quaternion.copy(carState.quaternion);
+  for (let i = 0; i < wheelsState.length; i++) {
+    wheels[i].position.copy(wheelsState[i].position);
+    wheels[i].quaternion.copy(wheelsState[i].quaternion);
+  }
+});
+
+/************ */
+let manualControl = true; // make this a click down event to enable orbit controls
+// document.onmousedown = () => (manualControl = true);
+// document.onmouseup = () => (manualControl = false);
+
+const clock = new THREE.Clock();
 const tick = () => {
+  const elapsedTime = clock.getElapsedTime();
+
   // Update controls
   controls.update();
+
+  // update camera
+  if (myId && users[myId] && !manualControl) {
+    let offset = new THREE.Vector3(
+      users[myId].position.x + 2,
+      users[myId].position.y + 20,
+      users[myId].position.z + 20
+    );
+    camera.position.lerp(offset, 0.2);
+    camera.position.copy(offset);
+    camera.lookAt(users[myId].position);
+  }
 
   // Render
   renderer.render(scene, camera);
@@ -150,22 +233,6 @@ tick();
 
 /*
 //Physics
-const world = new CANNON.World();
-world.broadphase = new CANNON.SAPBroadphase(world);
-world.gravity.set(0, -9.81, 0);
-world.allowSleep = true;
-const groundMaterial = new CANNON.Material("groundMaterial");
-const userMaterial = new CANNON.Material("userMaterial");
-const userGroundContactMaterial = new CANNON.ContactMaterial(
-  userMaterial,
-  groundMaterial,
-  {
-    friction: 0.3,
-    restitution: 0.1,
-    contactEquationStiffness: 1000,
-  }
-);
-world.addContactMaterial(userGroundContactMaterial);
 
 
 // floor body
@@ -183,69 +250,4 @@ const floorBody = new CANNON.Body({
 });
 // floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5);
 floorBody.position.copy(floorMesh.position);
-world.addBody(floorBody);
-
-// user mesh
-// box
-// const userMesh = new THREE.Mesh(
-//   new THREE.BoxGeometry(1, 1, 1),
-//   new THREE.MeshNormalMaterial()
-// );
-// spehre
-// const userMesh = new THREE.Mesh(
-//   new THREE.SphereGeometry(1),
-//   new THREE.MeshNormalMaterial()
-// );
-//
-// userMesh.position.y = 1;
-// scene.add(userMesh);
-
-// user body
-// box
-// const userBody = new CANNON.Body({
-//   mass: 1.0,
-//   position: new CANNON.Vec3(0, 3, 0),
-//   shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
-//   material: userMaterial,
-// });
-// sphere
-// const userBody = new CANNON.Body({
-//   mass: 1.0,
-//   position: new CANNON.Vec3(0, 1, 0),
-//   shape: new CANNON.Sphere(1),
-//   material: userMaterial,
-//   linearDamping: 0.6,
-//   angularDamping: 0.6,
-// });
-//
-// userBody.position.copy(userMesh.position);
-// world.addBody(userBody);
-
-let userMesh = null;
-let userBody = null;
-const userGeometry = new THREE.BoxGeometry(1, 1, 1);
-const userMeshMaterial = new THREE.MeshNormalMaterial();
-const userShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
-
-const users = {};
-const createUser = () => {
-  const pos = [
-    Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5,
-    3,
-    Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5,
-  ];
-  userMesh = new THREE.Mesh(userGeometry, userMeshMaterial);
-  userMesh.position.set(...pos);
-  scene.add(userMesh);
-  userBody = new CANNON.Body({
-    mass: 1.0,
-    position: new CANNON.Vec3(...pos),
-    shape: userShape,
-    material: userMaterial,
-  });
-  userBody.position.copy(userMesh.position);
-  world.addBody(userBody);
-};
-
-// userBody.applyLocalForce(new CANNON.Vec3(150, 0, 0), new CANNON.Vec3(0, 0, 0));
 */
