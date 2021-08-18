@@ -21,14 +21,15 @@ export default class Visuals {
       this.far
     );
     this.orbitControls = new OrbitControls(this.camera, this.canvas);
-    this.controls.enableDamping = true;
+    this.orbitControls.enableDamping = true;
     this.renderer = new THREE.WebGLRenderer({ canvas });
     this.configRenderer();
+    this.createGround();
   }
   configRenderer() {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.setSize(ths.sizes.width, this.sizes.height);
+    this.renderer.setSize(this.sizes.width, this.sizes.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   }
   resize() {
@@ -37,11 +38,50 @@ export default class Visuals {
     this.sizes.height = window.innerHeight;
 
     // Update camera
-    this.camera.aspect = sizes.width / sizes.height;
+    this.camera.aspect = this.sizes.width / this.sizes.height;
     this.camera.updateProjectionMatrix();
 
     // Update renderer
-    this.renderer.setSize(sizes.width, sizes.height);
+    this.renderer.setSize(this.sizes.width, this.sizes.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  }
+  createGround() {
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(100, 100),
+      new THREE.MeshStandardMaterial({ color: 0x222222 })
+    );
+    ground.rotateX(-Math.PI / 2);
+    this.scene.add(ground);
+  }
+  createCarMesh() {
+    const carGeometry = new THREE.BoxGeometry(2, 0.6, 4); // double chasis shape
+    const carMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffff00,
+      side: THREE.DoubleSide,
+    });
+    const carMesh = new THREE.Mesh(carGeometry, carMaterial);
+    return carMesh;
+  }
+  createWheels() {
+    const wheels = [];
+    for (let i = 0; i < 4; i++) {
+      const wheelRadius = 0.3;
+      const wheelGeometry = new THREE.CylinderGeometry(
+        wheelRadius,
+        wheelRadius,
+        0.4,
+        32
+      );
+      const wheelMaterial = new THREE.MeshPhongMaterial({
+        color: 0xd0901d,
+        emissive: 0xaa0000,
+        side: THREE.DoubleSide,
+        flatShading: true,
+      });
+      const wheelMesh = new THREE.Mesh(wheelGeometry, wheelMaterial);
+      wheelMesh.geometry.rotateZ(Math.PI / 2);
+      wheels.push(wheelMesh);
+    }
+    return wheels;
   }
 }

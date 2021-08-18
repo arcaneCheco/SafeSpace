@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import { threeJsCanvas } from "./threeJsCanvas";
-import VideoContainer from "./components/VideoContainer/VideoContainer";
+import threeJsCanvas from "./threeJsCanvas";
+// import VideoContainer from "./components/VideoContainer/VideoContainer";
 
 const App = () => {
   useEffect(() => {
@@ -9,7 +9,7 @@ const App = () => {
 
   return (
     <div>
-      <VideoContainer />
+      {/* <VideoContainer /> */}
       <canvas id="canvas"></canvas>
     </div>
   );
