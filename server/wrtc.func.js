@@ -1,9 +1,26 @@
+const wrtc = require("webrtc");
+const socketIO = require("socket.io");
+
+/******** WebRTC STUN SERVER *********/
+
+const pc_config = {
+  "iceServers": [
+    // {
+    //   urls: 'stun:[STUN_IP]:[PORT]',
+    //   'credentials': '[YOR CREDENTIALS]',
+    //   'username': '[USERNAME]'
+    // },
+    {
+      urls: 'stun:stun.l.google.com:19302'
+    }
+  ]
+}
+
 let receiverPCs = {}; // Saves RTCPeerConnection to receive MediaStream of connected user
 let senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of another user except yourself
-// let users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
-// let socketToRoom = {}; // Save which room the user belongs to
+let users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
+let socketToRoom = {}; // Save which room the user belongs to
 
-// socket = socket.io socket
 // save newly created PC as the value of receiverPCs with user's socketID as key
 // create event to receive user's MediaStream through that PC
 const createReceiverPeerConnection = (socketID, socket, roomID) => {
@@ -46,6 +63,7 @@ const createReceiverPeerConnection = (socketID, socket, roomID) => {
 
 // creates RTCPeerConnection to deliver user(SenderSocketID)'s MediaStream with receiverSocketID
 // adds video and audio track of senderSocketID user to corresponding RTCPeerConnection
+
 const createSenderPeerConnection = (receiverSocketID, senderSocketID, socket, roomID) => {
   let pc = new wrtc.RTCPeerConnection(pc_config);
 
@@ -75,7 +93,7 @@ const createSenderPeerConnection = (receiverSocketID, senderSocketID, socket, ro
   return pc;
 }
 
-// returns array of socketID for all user in roomID except for themselves
+// returns array of socketID for all users in roomID except for themselves
 const getOtherUsersInRoom = (socketID, roomID) => {
   let allUsers = [];
 
@@ -126,6 +144,15 @@ const closeSenderPCs = (socketID) => {
   }
 
   delete senderPCs[socketID];
+}
+
+module.exports = {
+  createReceiverPeerConnection,
+  createSenderPeerConnection,
+  getOtherUsersInRoom,
+  deleteUser, // might not need
+  closeRecevierPC,
+  closeSenderPCs
 }
 
 

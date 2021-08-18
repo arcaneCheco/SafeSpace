@@ -1,4 +1,15 @@
-io.sockets.on('connection', (socket) => {
+const socketIO = require("socket.io");
+const wrtc = require("webrtc");
+
+const io = socketIO(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+// double check socket io 'strings' that are emitting - make sure they're not doubling with physics
+
+const wrtcSockets = io.sockets.on('connection', (socket) => {
 
   // sends list of socket ID of users already in room and sending their media stream to the server to user who is now in
   // data.id - socketID of user joining room, data.id - roomID
@@ -53,7 +64,6 @@ io.sockets.on('connection', (socket) => {
   });
 
   // Add RTCIceCandidate to RTCPeerConnection
-  // what are we filtering
   socket.on('receiverCandidate', async (data) => {
     try {
       const senderPC = senderPCs[data.senderSocketID].filter(sPC => sPC.id === data.receiverSocketID);
@@ -78,3 +88,5 @@ io.sockets.on('connection', (socket) => {
     }
   });
 });
+
+module.exports = { wrtcSockets };
