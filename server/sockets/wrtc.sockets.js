@@ -1,6 +1,7 @@
 const socketIO = require("socket.io");
 const wrtc = require("webrtc");
 const {
+  isIncluded,
   createReceiverPeerConnection,
   createSenderPeerConnection,
   getOtherUsersInRoom,
@@ -9,12 +10,18 @@ const {
   closeSenderPCs
 } = require("../wrtc.func");
 
-const webrtcsocketlogic = (io) => {
-  io.sockets.on('connection', (socket) => {
 
-    // sends list of socket ID of users already in room and sending their media stream to the server to user who is now in
+module.exports = (io) => {
+
+  console.log('websocketlogic');
+
+  io.on('connection', (socket) => {
+
+    console.log('io.sockets.on');
+    // sends list of socket ID of users already in room and sending their media stream to the server to user who is now in 
     // data.id - socketID of user joining room, data.id - roomID
     socket.on('joinRoom', (data) => {
+
       try {
         let allUsers = getOtherUsersInRoom(data.id, data.roomID);
         io.to(data.id).emit('allUsers', { users: allUsers });
@@ -27,7 +34,7 @@ const webrtcsocketlogic = (io) => {
     // data.sdp - RTCSessionDescription of user who offered to send RTCPeerConnection
     socket.on('senderOffer', async (data) => {
       try {
-        // socketToRoom[data.senderSocketID] = data.roomID;
+        socketToRoom[data.senderSocketID] = data.roomID;
         let pc = createReceiverPeerConnection(data.senderSocketID, socket, data.roomID);
         await pc.setRemoteDescription(data.sdp);
         let sdp = await pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
@@ -65,6 +72,7 @@ const webrtcsocketlogic = (io) => {
     });
 
     // Add RTCIceCandidate to RTCPeerConnection
+    // what are we filtering
     socket.on('receiverCandidate', async (data) => {
       try {
         const senderPC = senderPCs[data.senderSocketID].filter(sPC => sPC.id === data.receiverSocketID);
@@ -89,7 +97,7 @@ const webrtcsocketlogic = (io) => {
       }
     });
   });
+
+
 }
 
-
-module.exports = webrtcsocketlogic;

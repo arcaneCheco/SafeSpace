@@ -21,6 +21,16 @@ let senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of a
 let users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
 let socketToRoom = {}; // Save which room the user belongs to
 
+
+// returns if array matches id
+const isIncluded = (array, id) => {
+  let len = array.length;
+  for (let i = 0; i < len; i++) {
+    if (array[i].id === id) return true;
+  }
+  return false;
+}
+
 // save newly created PC as the value of receiverPCs with user's socketID as key
 // create event to receive user's MediaStream through that PC
 const createReceiverPeerConnection = (socketID, socket, roomID) => {
@@ -147,6 +157,7 @@ const closeSenderPCs = (socketID) => {
 }
 
 module.exports = {
+  isIncluded,
   createReceiverPeerConnection,
   createSenderPeerConnection,
   getOtherUsersInRoom,

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Styled from 'styled-components';
 
-
 const ContainerStyled = Styled.div`
    position: relative;
    display: inline-block;
