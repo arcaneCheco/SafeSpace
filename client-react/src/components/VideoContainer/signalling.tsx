@@ -3,7 +3,7 @@ import { useState } from 'react';
 import io from 'socket.io-client';
 import { useRef } from 'react';
 import { useEffect } from 'react';
-import Video from './Video';
+import Video from './video';
 
 
 const Signalling: React.FC = () => {

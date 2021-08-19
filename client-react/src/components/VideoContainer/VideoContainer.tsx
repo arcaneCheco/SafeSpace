@@ -1,6 +1,6 @@
 import React from 'react'
 import './VideoContainer.css'
-import Signalling from './Signalling'
+import Signalling from './signalling'
 
 const VideoContainer = () => {
   return (
