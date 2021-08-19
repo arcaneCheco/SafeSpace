@@ -2,14 +2,29 @@ import * as THREE from "three";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import { io } from "socket.io-client";
 import Visuals from "./visuals";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
 export default function threeJsCanvas() {
   const canvas = document.querySelector("#canvas");
   const visuals = new Visuals(canvas);
   let myId = "";
   let updateInterval;
+  let avatar = null;
+  let isLoaded = false;
+  // load model
+  const loadModel = () => {
+    visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
+      const mixer = new THREE.AnimationMixer(gltf.scene);
+      const action = mixer.clipAction(gltf.animations[0]);
+      // console.log(gltf);
+      const mesh = gltf.scene.children[0];
+      mesh.scale.set(8, 8, 8);
+      // visuals.scene.add(mesh);
+      avatar = { action, mesh, mixer };
+      isLoaded = true;
+      socket.emit("model loaded", isLoaded);
+    });
+  };
+  loadModel();
   const users = {};
   const controlModes = {
     sphereUserControl: true,
@@ -17,18 +32,6 @@ export default function threeJsCanvas() {
   };
 
   const gui = new GUI();
-
-  //models
-  let avatar = null;
-  visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
-    const mixer = new THREE.AnimationMixer(gltf.scene);
-    const action = mixer.clipAction(gltf.animations[0]);
-    console.log(gltf);
-    const mesh = gltf.scene.children[0];
-    mesh.scale.set(4, 4, 4);
-    visuals.scene.add(mesh);
-    avatar = { action, mesh, mixer };
-  });
 
   const map = {};
   document.onkeydown = document.onkeyup = (e) => {
@@ -45,6 +48,7 @@ export default function threeJsCanvas() {
    * add socketIO
    */
   const socket = io("http://localhost:3001");
+
   socket.on("connect", () => {
     console.log("connect");
   });
@@ -54,10 +58,26 @@ export default function threeJsCanvas() {
     }
     socket.disconnect();
   };
-  socket.on("joined", (id, activeUsers) => {
+  // socket.on("joined", (id, activeUsers) => {
+  //   myId = id;
+  //   for (const [userId, userData] of Object.entries(activeUsers)) {
+  //     users[userId] = visuals.createSphereAvatar();
+  //     users[userId].name = userData.username;
+  //     users[userId].position.copy(userData.position);
+  //     visuals.scene.add(users[userId]);
+  //   }
+  //   updateInterval = setInterval(() => {
+  //     socket.emit("update", map, controlModes);
+  //   }, 50);
+  // });
+  socket.on("call1", (message) => {
+    console.log(message);
+  });
+  socket.on("joined", async (id, activeUsers) => {
     myId = id;
+    console.log(avatar);
     for (const [userId, userData] of Object.entries(activeUsers)) {
-      users[userId] = visuals.createSphereAvatar();
+      users[userId] = avatar.mesh;
       users[userId].name = userData.username;
       users[userId].position.copy(userData.position);
       visuals.scene.add(users[userId]);
@@ -66,6 +86,7 @@ export default function threeJsCanvas() {
       socket.emit("update", map, controlModes);
     }, 50);
   });
+
   socket.on("add new user", (id, newUser) => {
     users[id] = visuals.createSphereAvatar();
     users[id].name = newUser.username;
@@ -90,8 +111,6 @@ export default function threeJsCanvas() {
   // socket.on("active users ordered", (orderedUserList) => {
   //   console.log(orderedUserList);
   // });
-
-  //
 
   /**
    * Lights
