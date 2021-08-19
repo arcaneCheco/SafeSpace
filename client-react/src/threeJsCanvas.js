@@ -3,7 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import { io } from "socket.io-client";
 import { aWonderfulWorld } from "./aWonderfulWorld";
-import Visuals from "./visuals";
+// import Visuals from "./visuals"; commented out for dev Daniel
 
 const threeJsCanvas = () => {
   let myId = "";
