@@ -1,15 +1,11 @@
 .VideoContainer {
-  position: absolute;
+  position: relative;
   display: flex;
   justify-content: flex-start;
   padding: 10px 30px 10px 30px;
-  background-color: rgba(92, 240, 240, 0.103);
-  height: 200px;
-  width: 100vw;
+  background-color: rgba(92, 240, 240, 0);
+  height: 100%;
+  width: 100%;
 }
 
-.Signalling {
-  border-radius: 500px;
-  opacity: 1;
-}
 

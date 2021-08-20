@@ -22,5 +22,7 @@ const io = socketIO(server, {
 });
 
 physicsSockets(io);
+
+//10.10.22.47
 webrtcsocketlogic(io);
 
