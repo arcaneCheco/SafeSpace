@@ -6,7 +6,7 @@ const webrtcsocketlogic = require("./sockets/wrtc.sockets");
 
 // console.log(wrtc);
 
-const PORT = 3003;
+const PORT = 3001;
 const app = express();
 
 const server = app.listen(PORT, () => {
