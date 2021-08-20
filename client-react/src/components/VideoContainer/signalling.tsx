@@ -282,7 +282,7 @@ const Signalling: React.FC = () => {
           receiverSocketID: newSocket.id,
           senderSocketID: socketID,
         });
-        console.log(newSocket, 'newwwwww socokeetttt')
+        console.log(newSocket, "newwwwww socokeetttt");
       }
     };
 
@@ -313,12 +313,21 @@ const Signalling: React.FC = () => {
 
   return (
     <div className="Signalling">
-      <div className='videoBox'>
-        <video className="videoTile" muted ref={localVideoRef} autoPlay></video>
+      <div className="usersVideosBox">
+          {users.map((user, index) => {
+            return <Video key={index} stream={user.stream} />;
+          })}
       </div>
-      {users.map((user, index) => {
-        return <Video key={index} stream={user.stream} />;
-      })}
+      <div className="userVideo">
+        <div className="videoBox">
+          <video
+            className="videoTile"
+            muted
+            ref={localVideoRef}
+            autoPlay
+          ></video>
+        </div>
+      </div>
     </div>
   );
 };

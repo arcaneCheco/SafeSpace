@@ -1,19 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Styled from 'styled-components';
-
-const ContainerStyled = Styled.div`
-   position: relative;
-   display: inline-block;
-   width: 240px;
-   height: 240px;
-   margin: 5px;
-`;
-
-const VideoContainerStyled = Styled.video`
-   width: 240px;
-   height: 240px;
-   background-color: black;
-`;
+import './video.css';
 
 interface Props {
   stream: MediaStream;
@@ -33,13 +19,14 @@ const Video = ({ stream, muted }: Props) => {
   })
 
   return (
-    <ContainerStyled>
-      <VideoContainerStyled
+    <div className='videoSingle' >
+      <video
+      className='videoTileSingle'
         ref={ref}
         muted={isMuted}
         autoPlay
-      ></VideoContainerStyled>
-    </ContainerStyled>
+      ></video>
+    </div>
   );
 }
 
