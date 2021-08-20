@@ -252,8 +252,9 @@ const Signalling: React.FC = () => {
         newSocket.emit('receiverCandidate', {
           candidate: e.candidate,
           receiverSocketID: newSocket.id,
-          senderSocketID: socketID
+          senderSocketID: socketID,
         });
+        console.log(newSocket, 'newwwwww socokeetttt')
       }
     }
 
