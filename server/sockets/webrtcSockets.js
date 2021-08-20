@@ -1,34 +1,27 @@
 const socketIO = require("socket.io");
 const wrtc = require("wrtc");
-const {
-  createReceiverPeerConnection,
-  createSenderPeerConnection,
-  getOtherUsersInRoom,
-  deleteUser, // might not need
-  closeRecevierPC,
-  closeSenderPCs,
-} = require("../wrtc.func");
+const { WebRTCFuncs } = require("../webrtc");
 
-const wrtcfuncs = new WRTCFuncs();
+let receiverPCs = {}; // Saves RTCPeerConnection to receive MediaStream of connected user
+let senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of another user except yourself
+let users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
+let socketToRoom = {}; // Save which room the user belongs to
+// sends list of socket ID of users already in room and sending their media stream to the server to user who is now in 
+// data.id - socketID of user joining room, data.id - roomID
+
+
+const webRTC = new WebRTCFuncs();
 
 module.exports = (io) => {
-
-  console.log('websocketlogic');
 
   io.on('connection', (socket) => {
 
     console.log('io.sockets.on');
 
-    let receiverPCs = {}; // Saves RTCPeerConnection to receive MediaStream of connected user
-    let senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of another user except yourself
-    let users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
-    let socketToRoom = {}; // Save which room the user belongs to
-    // sends list of socket ID of users already in room and sending their media stream to the server to user who is now in 
-    // data.id - socketID of user joining room, data.id - roomID
     socket.on('joinRoom', (data) => {
 
       try {
-        let allUsers = getOtherUsersInRoom(data.id, data.roomID);
+        let allUsers = webRTC.getOtherUsersInRoom(data.id, data.roomID);
         io.to(data.id).emit('allUsers', { users: allUsers });
       } catch (error) {
         console.log(error);
@@ -40,7 +33,7 @@ module.exports = (io) => {
     socket.on('senderOffer', async (data) => {
       try {
         socketToRoom[data.senderSocketID] = data.roomID;
-        let pc = createReceiverPeerConnection(data.senderSocketID, socket, data.roomID);
+        let pc = webRTC.createReceiverPeerConnection(data.senderSocketID, socket, data.roomID);
         await pc.setRemoteDescription(data.sdp);
         let sdp = await pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
         await pc.setLocalDescription(sdp);
@@ -55,7 +48,7 @@ module.exports = (io) => {
     // data.candidate - RTCICeCandidate of user
     socket.on('senderCandidate', (data) => {
       try {
-        let pc = receiverPCs[data.senderSocketID];
+        let pc = webRTC.receiverPCs[data.senderSocketID];
         pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
       } catch (error) {
         console.log(error);
@@ -65,7 +58,7 @@ module.exports = (io) => {
     // User who has receiverSocketID as societID receives an offer of RTCPEerConnection to receive MediaStream of user who has senderSocketID as socketID, sends an answer
     socket.on('receiverOffer', async (data) => {
       try {
-        let pc = createSenderPeerConnection(data.receiverSocketID, data.senderSocketID, socket, data.roomID);
+        let pc = webRTC.createSenderPeerConnection(data.receiverSocketID, data.senderSocketID, socket, data.roomID);
         await pc.setRemoteDescription(data.sdp);
         // set to false as they do not receive audio and video streams from users, as the RTCPeerConnection created is a connection to send a stram of existing users
         let sdp = await pc.createAnswer({ offerToReceiveAudio: false, offerToReceiveVideo: false });
@@ -77,12 +70,10 @@ module.exports = (io) => {
     });
 
     // Add RTCIceCandidate to RTCPeerConnection
-    // what are we filtering
     socket.on('receiverCandidate', async (data) => {
-      console.log('where tf is ICEEEEEEEEE')
       try {
-        console.log('where is ICE candidatreeeeee')
-        const senderPC = senderPCs[data.senderSocketID].filter(sPC => sPC.id === data.receiverSocketID);
+        const senderPC = webRTC.senderPCs[data.senderSocketID].filter(sPC => sPC.id === data.receiverSocketID);
+        // console.log(senderPC, 'SENDERRRRRRR PCCCCCC')
         await senderPC[0].pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
       } catch (error) {
         console.log(error);
@@ -94,9 +85,9 @@ module.exports = (io) => {
       try {
         let roomID = socketToRoom[socket.id];
 
-        deleteUser(socket.id, roomID);
-        closeRecevierPC(socket.id);
-        closeSenderPCs(socket.id);
+        webRTC.deleteUser(socket.id, roomID);
+        webRTC.closeRecevierPC(socket.id);
+        webRTC.closeSenderPCs(socket.id);
 
         socket.broadcast.to(roomID).emit('userExit', { id: socket.id });
       } catch (error) {
@@ -104,7 +95,5 @@ module.exports = (io) => {
       }
     });
   });
-
-
 }
 
