@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Styled from 'styled-components';
 
-
 const ContainerStyled = Styled.div`
    position: relative;
    display: inline-block;
@@ -22,10 +21,10 @@ interface Props {
 }
 
 const Video = ({ stream, muted }: Props) => {
-  // const ref = useRef<HTMLVideoElement>(null);
+  const ref = useRef<HTMLVideoElement>(null);
   // const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const ref = useRef(null);
+  // const ref = useRef(null);
   const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
