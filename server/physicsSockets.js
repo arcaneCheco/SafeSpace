@@ -48,6 +48,8 @@ const updateConnectionGradients = (distanceToOtherUsers) => {
 };
 
 const physics = new Physics();
+// ground
+physics.addBoxGround();
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
@@ -58,25 +60,21 @@ module.exports = (io) => {
       quaternion: { x: 0, y: 0, z: 0, w: 0 },
       connectionGradients: {},
     };
-    activeUsers[socket.id].bodyId = physics.createAndAddSphereAvatar(socket.id);
-    activeUsers[socket.id].position = physics.userBodies[socket.id].position;
+    activeUsers[socket.id].bodyId = physics.createAndAddCylAvatar(socket.id);
 
-    // ground
-    physics.addBoxGround();
     // create Car
-    const chassisBody = physics.createCarChassis();
-    const car = physics.createCar(chassisBody, 0.7);
-    car.addToWorld(physics.world);
-    const wheelBodies = physics.createWheelBodies(car);
+    // const chassisBody = physics.createCarChassis();
+    // const car = physics.createCar(chassisBody, 0.7);
+    // car.addToWorld(physics.world);
+    // const wheelBodies = physics.createWheelBodies(car);
 
     //   activeUsers[socket.id].color =
     //     "#" + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6);
+
     socket.on("model loaded", () => {
       socket.emit("joined", socket.id, activeUsers);
+      socket.broadcast.emit("add new user", socket.id, activeUsers[socket.id]);
     });
-    socket.broadcast.emit("add new user", socket.id, activeUsers[socket.id]);
-
-    activeUsers[socket.id].bodyId = physics.createAndAddSphereAvatar(socket.id);
 
     socket.on("disconnect", () => {
       console.log("socket disconnected : " + socket.id);
@@ -129,8 +127,12 @@ module.exports = (io) => {
     setInterval(() => {
       physics.world.step(0.025);
       Object.keys(activeUsers).forEach((user) => {
-        activeUsers[user].position = physics.userBodies[user].position;
-        activeUsers[user].quaternion = physics.userBodies[user].quaternion;
+        activeUsers[user].position = {
+          x: physics.userBodies[user].position.x,
+          y: physics.userBodies[user].position.y - 1.5080219133341668 * 4 * 0.5,
+          z: physics.userBodies[user].position.z,
+        };
+        // activeUsers[user].quaternion = physics.userBodies[user].quaternion;
       });
       if (carControl) {
         physics.updateCarWheels(car, wheelBodies);

@@ -8,12 +8,18 @@ export default class Visuals {
   constructor(canvas) {
     this.canvas = canvas;
     this.scene = new THREE.Scene();
-    this.sizes = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
+    // this.sizes = {
+    //   width: window.innerWidth,
+    //   height: window.innerHeight,
+    // };
+    // this.sizes = () => ({
+    //   width: window.innerWidth,
+    //   height: window.innerHeight,
+    // });
+    this.windowWidth = window.innerWidth;
+    this.windowHeight = window.innerHeight;
     this.fov = 75;
-    this.aspect = this.sizes.width / this.sizes.height;
+    this.aspect = this.windowWidth / this.windowHeight;
     this.near = 0.1;
     this.far = 1000;
     this.camera = new THREE.PerspectiveCamera(
@@ -33,20 +39,20 @@ export default class Visuals {
   configRenderer() {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.setSize(this.sizes.width, this.sizes.height);
+    this.renderer.setSize(this.windowWidth, this.windowHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   }
   resize() {
     // Update sizes
-    this.sizes.width = window.innerWidth;
-    this.sizes.height = window.innerHeight;
+    this.windowWidth = window.innerWidth;
+    this.windowHeight = window.innerHeight;
 
     // Update camera
-    this.camera.aspect = this.sizes.width / this.sizes.height;
+    this.camera.aspect = this.aspect;
     this.camera.updateProjectionMatrix();
 
     // Update renderer
-    this.renderer.setSize(this.sizes.width, this.sizes.height);
+    this.renderer.setSize(this.windowWidth, this.windowHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   }
   setDRACOLoader() {

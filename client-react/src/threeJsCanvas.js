@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import { io } from "socket.io-client";
 import Visuals from "./visuals";
+// import { SkeletonUtils } from "three-stdlib";
+import { SkeletonUtils } from "three/examples/jsm/utils/SkeletonUtils";
 
 export default function threeJsCanvas() {
   const canvas = document.querySelector("#canvas");
@@ -10,26 +12,52 @@ export default function threeJsCanvas() {
   let updateInterval;
   let avatar = null;
   let isLoaded = false;
-  // load model
-  const loadModel = () => {
-    visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
-      const mixer = new THREE.AnimationMixer(gltf.scene);
-      const action = mixer.clipAction(gltf.animations[0]);
-      // console.log(gltf);
-      const mesh = gltf.scene.children[0];
-      mesh.scale.set(8, 8, 8);
-      // visuals.scene.add(mesh);
-      avatar = { action, mesh, mixer };
-      isLoaded = true;
-      socket.emit("model loaded", isLoaded);
-    });
-  };
-  loadModel();
   const users = {};
   const controlModes = {
     sphereUserControl: true,
     carControl: false,
   };
+  // let isLoaded = false;
+  window.addEventListener("resize", () => {
+    visuals.windowWidth = window.innerWidth;
+    visuals.windowHeight = window.innerHeight;
+
+    // Update camera
+    visuals.camera.aspect = visuals.windowWidth / visuals.windowHeight;
+    visuals.camera.updateProjectionMatrix();
+
+    // Update renderer
+    visuals.renderer.setSize(visuals.windowWidth, visuals.windowHeight);
+    visuals.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  });
+  // load model
+  const loadModel = () => {
+    visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
+      // // cesum man mesh size before scaling:
+      // // 1.140032197089109 1.5080219133341668 0.3135272997496078
+      // const mixer = new THREE.AnimationMixer(gltf.scene);
+      // const action = mixer.clipAction(gltf.animations[0]);
+      // action.play();
+      // const mesh = gltf.scene.children[0];
+      // // const box = new THREE.Box3().setFromObject(mesh);
+      // mesh.scale.set(4, 4, 4);
+      // mesh.rotateZ(Math.PI);
+
+      // avatar = { action, mesh, mixer };
+      //
+      isLoaded = true;
+      avatar = {
+        mesh: gltf.scene.children[0],
+        mixer: new THREE.AnimationMixer(gltf.scene),
+      };
+      avatar.action = avatar.mixer.clipAction(gltf.animations[0]);
+      avatar.mesh.scale.set(4, 4, 4);
+      avatar.mesh.rotateZ(Math.PI);
+      avatar.action.play();
+      socket.emit("model loaded");
+    });
+  };
+  loadModel();
 
   const gui = new GUI();
 
@@ -58,26 +86,16 @@ export default function threeJsCanvas() {
     }
     socket.disconnect();
   };
-  // socket.on("joined", (id, activeUsers) => {
-  //   myId = id;
-  //   for (const [userId, userData] of Object.entries(activeUsers)) {
-  //     users[userId] = visuals.createSphereAvatar();
-  //     users[userId].name = userData.username;
-  //     users[userId].position.copy(userData.position);
-  //     visuals.scene.add(users[userId]);
-  //   }
-  //   updateInterval = setInterval(() => {
-  //     socket.emit("update", map, controlModes);
-  //   }, 50);
-  // });
-  socket.on("call1", (message) => {
-    console.log(message);
-  });
-  socket.on("joined", async (id, activeUsers) => {
+
+  socket.on("joined", (id, activeUsers) => {
     myId = id;
-    console.log(avatar);
     for (const [userId, userData] of Object.entries(activeUsers)) {
-      users[userId] = avatar.mesh;
+      if (userId === myId) {
+        users[userId] = avatar.mesh;
+      } else {
+        const newMesh = SkeletonUtils.clone(avatar.mesh);
+        users[userId] = newMesh;
+      }
       users[userId].name = userData.username;
       users[userId].position.copy(userData.position);
       visuals.scene.add(users[userId]);
@@ -88,7 +106,8 @@ export default function threeJsCanvas() {
   });
 
   socket.on("add new user", (id, newUser) => {
-    users[id] = visuals.createSphereAvatar();
+    const newMesh = SkeletonUtils.clone(avatar.mesh);
+    users[id] = newMesh;
     users[id].name = newUser.username;
     users[id].position.copy(newUser.position);
     visuals.scene.add(users[id]);
@@ -97,7 +116,7 @@ export default function threeJsCanvas() {
     for (const [userId, userData] of Object.entries(activeUsers)) {
       if (users[userId]) {
         users[userId].position.copy(userData.position);
-        users[userId].quaternion.copy(userData.quaternion);
+        // users[userId].quaternion.copy(userData.quaternion);
       }
     }
   });
@@ -117,8 +136,6 @@ export default function threeJsCanvas() {
    */
   const ambientLight = new THREE.AmbientLight();
   visuals.scene.add(ambientLight);
-
-  window.addEventListener("resize", visuals.resize);
 
   /**
    * Camera
@@ -152,8 +169,8 @@ export default function threeJsCanvas() {
 
   /************ */
   let manualControl = false; // make this a click down event to enable orbit controls
-  // document.onmousedown = () => (manualControl = true);
-  // document.onmouseup = () => (manualControl = false);
+  document.onmousedown = () => (manualControl = true);
+  document.onmouseup = () => (manualControl = false);
 
   const clock = new THREE.Clock();
   let oldElapsedTime = 0;
@@ -170,7 +187,10 @@ export default function threeJsCanvas() {
       visuals.updateAvatarModeCamera(users[myId]);
     }
     //update animaations
-    if (avatar && avatar.mixer) {
+    if (
+      isLoaded &&
+      (map.ArrowUp || map.ArrowDown || map.ArrowLeft || map.ArrowRight)
+    ) {
       avatar.mixer.update(deltaTime);
     }
 
