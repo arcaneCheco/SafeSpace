@@ -35,16 +35,7 @@ export default function threeJsCanvas() {
     visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
       // // cesum man mesh size before scaling:
       // // 1.140032197089109 1.5080219133341668 0.3135272997496078
-      // const mixer = new THREE.AnimationMixer(gltf.scene);
-      // const action = mixer.clipAction(gltf.animations[0]);
-      // action.play();
-      // const mesh = gltf.scene.children[0];
       // // const box = new THREE.Box3().setFromObject(mesh);
-      // mesh.scale.set(4, 4, 4);
-      // mesh.rotateZ(Math.PI);
-
-      // avatar = { action, mesh, mixer };
-      //
       isLoaded = true;
       avatar = {
         mesh: gltf.scene.children[0],
@@ -55,6 +46,7 @@ export default function threeJsCanvas() {
       avatar.mesh.rotateZ(Math.PI);
       avatar.action.play();
       socket.emit("model loaded");
+      console.log(avatar.mesh);
     });
   };
   loadModel();
@@ -112,11 +104,18 @@ export default function threeJsCanvas() {
     users[id].position.copy(newUser.position);
     visuals.scene.add(users[id]);
   });
+
+  const helper = new THREE.GridHelper();
+  visuals.scene.add(helper);
+
   socket.on("update", (activeUsers) => {
     for (const [userId, userData] of Object.entries(activeUsers)) {
       if (users[userId]) {
         users[userId].position.copy(userData.position);
+        // map.ArrowUp && users[userId].translateY(-0.1);
+        map.ArrowRight && users[userId].rotateZ(-0.1);
         // users[userId].quaternion.copy(userData.quaternion);
+        // users[userId].rotateZ()
       }
     }
   });

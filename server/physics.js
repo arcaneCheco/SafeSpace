@@ -209,6 +209,18 @@ class Physics {
     if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
     return new CANNON.Vec3(...appliedForce);
   }
+  turnAvatar(map) {
+    let direction = [0, 0, 0];
+    // if (map.ArrowUp) direction[2] = 1;
+    // if (map.ArrowRight) direction[0] = 1;
+    // if (map.ArrowDown) direction[2] = -1;
+    // if (map.ArrowLeft) direction[0] = -1;
+    // if (map.ArrowUp) direction[1] += 1;
+    if (map.ArrowRight) direction[1] += 1;
+    if (map.ArrowDown) direction[1] += 2;
+    if (map.ArrowLeft) direction[1] += 3;
+    return direction;
+  }
 }
 module.exports = Physics;
 // const physics = new Physics();

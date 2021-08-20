@@ -1,4 +1,5 @@
 const CANNON = require("cannon-es");
+const { mainModule } = require("process");
 const Physics = require("./physics");
 let activeUsers = {};
 let userCount = 0;
@@ -57,6 +58,7 @@ module.exports = (io) => {
     activeUsers[socket.id] = {
       username: `User00` + userCount++,
       position: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, y: 0 },
       quaternion: { x: 0, y: 0, z: 0, w: 0 },
       connectionGradients: {},
     };
@@ -92,12 +94,16 @@ module.exports = (io) => {
     });
 
     let carControl;
+    let direction = [0, 0, 0];
     socket.on("update", (map, controlModes) => {
       if (controlModes.carControl) {
         carControl = true;
         physics.carNavigation(car, map);
       } else {
         if (activeUsers[socket.id]) {
+          // direction = physics.turnAvatar(map);
+          // console.log(physics.userBodies[socket.id]);
+          // map.ArrowRight && (physics.userBodies[socket.id].rotation.y -= 0.1);
           const appliedForce = physics.navigateSphereAvatar(map);
           physics.userBodies[socket.id].applyForce(
             appliedForce,
@@ -132,7 +138,10 @@ module.exports = (io) => {
           y: physics.userBodies[user].position.y - 1.5080219133341668 * 4 * 0.5,
           z: physics.userBodies[user].position.z,
         };
-        // activeUsers[user].quaternion = physics.userBodies[user].quaternion;
+        // if (direction.some((x) => !!x)) {
+        //   activeUsers[user].rotation.z
+        // }
+        activeUsers[user].quaternion = physics.userBodies[user].quaternion;
       });
       if (carControl) {
         physics.updateCarWheels(car, wheelBodies);
