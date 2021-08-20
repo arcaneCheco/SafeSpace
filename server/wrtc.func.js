@@ -1,25 +1,72 @@
-const wrtc = require("webrtc");
+const wrtc = require("wrtc");
 const socketIO = require("socket.io");
+
 
 /******** WebRTC STUN SERVER *********/
 
-const pc_config = {
-  "iceServers": [
-    // {
-    //   urls: 'stun:[STUN_IP]:[PORT]',
-    //   'credentials': '[YOR CREDENTIALS]',
-    //   'username': '[USERNAME]'
-    // },
-    {
-      urls: 'stun:stun.l.google.com:19302'
+class WRTCFuncs {
+  constructor() {
+    this.pc_config = {
+      "iceServers": [
+        // {
+        //   urls: 'stun:[STUN_IP]:[PORT]',
+        //   'credentials': '[YOR CREDENTIALS]',
+        //   'username': '[USERNAME]'
+        // },
+        {
+          urls: 'stun:stun.l.google.com:19302'
+        }
+      ]
     }
-  ]
+
+    this.receiverPCs = {}; // Saves RTCPeerConnection to receive MediaStream of connected user
+    this.senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of another user except yourself
+    this.users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
+    this.socketToRoom = {}; // Save which room the user belongs to
+
+  }
+
+  createReceiverPeerConnection(socketId) {
+    // console.log(socketID);
+
+    let pc = new wrtc.RTCPeerConnection(this.pc_config);
+
+    if (this.receiverPCs[socketID]) this.receiverPCs[socketID] = pc;
+    else this.receiverPCs = { ...this.receiverPCs, [socketID]: pc };
+
+    pc.onicecandidate = (e) => {
+      //console.log(`socketID: ${socketID}'s receiverPeerConnection icecandidate`);
+      socket.to(socketID).emit('getSenderCandidate', {
+        candidate: e.candidate
+      });
+    }
+
+    pc.oniceconnectionstatechange = (e) => {
+      //console.log(e);
+    }
+
+    pc.ontrack = (e) => {
+      if (users[roomID]) {
+        if (!isIncluded(users[roomID], socketID)) {
+          users[roomID].push({
+            id: socketID,
+            stream: e.streams[0]
+          });
+        } else return;
+      } else {
+        users[roomID] = [{
+          id: socketID,
+          stream: e.streams[0]
+        }];
+      }
+      socket.broadcast.to(roomID).emit('userEnter', { id: socketID });
+    }
+
+    return pc;
+  }
 }
 
-let receiverPCs = {}; // Saves RTCPeerConnection to receive MediaStream of connected user
-let senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of another user except yourself
-let users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
-let socketToRoom = {}; // Save which room the user belongs to
+
 
 
 // returns if array matches id
@@ -34,6 +81,9 @@ const isIncluded = (array, id) => {
 // save newly created PC as the value of receiverPCs with user's socketID as key
 // create event to receive user's MediaStream through that PC
 const createReceiverPeerConnection = (socketID, socket, roomID) => {
+
+  // console.log(socketID);
+
   let pc = new wrtc.RTCPeerConnection(pc_config);
 
   if (receiverPCs[socketID]) receiverPCs[socketID] = pc;
@@ -161,9 +211,9 @@ module.exports = {
   createReceiverPeerConnection,
   createSenderPeerConnection,
   getOtherUsersInRoom,
-  deleteUser, // might not need
+  deleteUser,
   closeRecevierPC,
-  closeSenderPCs
+  closeSenderPCs,
 }
 
 

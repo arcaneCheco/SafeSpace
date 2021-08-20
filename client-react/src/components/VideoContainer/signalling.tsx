@@ -31,7 +31,7 @@ const Signalling: React.FC = () => {
   }
 
   useEffect(() => {
-    let newSocket = io('http://localhost:3002');
+    let newSocket = io('http://localhost:3003');
     let localStream: MediaStream;
 
     newSocket.on('connection', () => {
@@ -201,10 +201,12 @@ const Signalling: React.FC = () => {
   const createSenderPeerConnection = (newSocket: any, localStream: MediaStream): RTCPeerConnection => {
 
     let pc = new RTCPeerConnection(pc_config);
+    // console.log(pc, 'pcccccc');
 
     // Your RTCIceCandidate information event occurred after you created the offer or answer signal.
     // Sends RTCIceCandidate information to the server via Socket
     pc.onicecandidate = (e) => {
+      console.log(e, 'EVEMNTTTTT');
       if (e.candidate) {
         console.log('sender PC onicecandidate');
         newSocket.emit('senderCandidate', {

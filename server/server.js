@@ -1,8 +1,9 @@
 const express = require("express");
 const socketIO = require("socket.io");
-const wrtc = require("webrtc");
+const wrtc = require("wrtc");
 const webrtcsocketlogic = require("./sockets/wrtc.sockets");
 
+// console.log(wrtc);
 
 const PORT = 3003;
 const app = express();

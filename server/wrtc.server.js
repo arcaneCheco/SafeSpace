@@ -1,7 +1,7 @@
 const express = require("express");
 const socketIO = require("socket.io");
 const CANNON = require("cannon-es");
-const wrtc = require("webrtc");
+const wrtc = require("wrtc");
 
 const PORT = 3002;
 const app = express();

@@ -1,15 +1,15 @@
 const socketIO = require("socket.io");
-const wrtc = require("webrtc");
+const wrtc = require("wrtc");
 const {
-  isIncluded,
   createReceiverPeerConnection,
   createSenderPeerConnection,
   getOtherUsersInRoom,
   deleteUser, // might not need
   closeRecevierPC,
-  closeSenderPCs
+  closeSenderPCs,
 } = require("../wrtc.func");
 
+const wrtcfuncs = new WRTCFuncs();
 
 module.exports = (io) => {
 
@@ -18,6 +18,11 @@ module.exports = (io) => {
   io.on('connection', (socket) => {
 
     console.log('io.sockets.on');
+
+    let receiverPCs = {}; // Saves RTCPeerConnection to receive MediaStream of connected user
+    let senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of another user except yourself
+    let users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
+    let socketToRoom = {}; // Save which room the user belongs to
     // sends list of socket ID of users already in room and sending their media stream to the server to user who is now in 
     // data.id - socketID of user joining room, data.id - roomID
     socket.on('joinRoom', (data) => {
@@ -48,10 +53,10 @@ module.exports = (io) => {
 
     // Adds RTCIceCandidate to the RTCPeerConnection that's saved when the user sends an offer
     // data.candidate - RTCICeCandidate of user
-    socket.on('senderCandidate', async (data) => {
+    socket.on('senderCandidate', (data) => {
       try {
         let pc = receiverPCs[data.senderSocketID];
-        await pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
+        pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
       } catch (error) {
         console.log(error);
       }
@@ -74,7 +79,9 @@ module.exports = (io) => {
     // Add RTCIceCandidate to RTCPeerConnection
     // what are we filtering
     socket.on('receiverCandidate', async (data) => {
+      console.log('where tf is ICEEEEEEEEE')
       try {
+        console.log('where is ICE candidatreeeeee')
         const senderPC = senderPCs[data.senderSocketID].filter(sPC => sPC.id === data.receiverSocketID);
         await senderPC[0].pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
       } catch (error) {
