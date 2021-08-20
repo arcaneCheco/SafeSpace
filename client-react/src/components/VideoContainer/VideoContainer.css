@@ -1,5 +1,5 @@
 .VideoContainer {
-  position: absolute;
+  position: relative;
   display: flex;
   justify-content: flex-start;
   padding: 10px 30px 10px 30px;

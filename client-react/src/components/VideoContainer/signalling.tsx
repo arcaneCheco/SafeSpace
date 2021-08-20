@@ -30,7 +30,7 @@ const Signalling: React.FC = () => {
   };
 
   useEffect(() => {
-    let newSocket = io("http://localhost:3003");
+    let newSocket = io("http://localhost:3001");
     let localStream: MediaStream;
 
     newSocket.on("connection", () => {
