@@ -4,7 +4,7 @@ const physicsSockets = require("./physicsSockets");
 const wrtc = require("wrtc");
 const webrtcsocketlogic = require("./sockets/webrtcSockets");
 
-const PORT = 3003;
+const PORT = 3001;
 const app = express();
 
 const server = app.listen(PORT, () => {

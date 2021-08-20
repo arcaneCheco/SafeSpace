@@ -13,10 +13,12 @@ export default function threeJsCanvas() {
   let avatar = null;
   let isLoaded = false;
   const users = {};
+  const activeUsersObj = {};
   const controlModes = {
     sphereUserControl: true,
     carControl: false,
   };
+
   // let isLoaded = false;
   window.addEventListener("resize", () => {
     visuals.windowWidth = window.innerWidth;
@@ -30,6 +32,7 @@ export default function threeJsCanvas() {
     visuals.renderer.setSize(visuals.windowWidth, visuals.windowHeight);
     visuals.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   });
+
   // load model
   const loadModel = () => {
     visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
@@ -116,6 +119,7 @@ export default function threeJsCanvas() {
     for (const [userId, userData] of Object.entries(activeUsers)) {
       if (users[userId]) {
         users[userId].position.copy(userData.position);
+        users[userId].connectionGradients = userData.connectionGradients;
         // users[userId].quaternion.copy(userData.quaternion);
       }
     }
@@ -196,6 +200,9 @@ export default function threeJsCanvas() {
 
     // Render
     visuals.renderer.render(visuals.scene, visuals.camera);
+
+    // Retrieve users distances for connectionGradients
+    console.log(users)
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick);
