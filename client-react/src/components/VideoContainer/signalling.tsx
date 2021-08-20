@@ -282,6 +282,7 @@ const Signalling: React.FC = () => {
           receiverSocketID: newSocket.id,
           senderSocketID: socketID,
         });
+        console.log(newSocket, 'newwwwww socokeetttt')
       }
     };
 
