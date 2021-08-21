@@ -1,7 +1,7 @@
 const express = require("express");
 const socketIO = require("socket.io");
-const physicsSockets = require("./physicsSockets");
 const wrtc = require("wrtc");
+const physicsSockets = require("./physicsSockets");
 const webrtcsocketlogic = require("./sockets/webrtcSockets");
 
 const PORT = 3001;
@@ -21,18 +21,10 @@ const io = socketIO(server, {
   },
 });
 
-// const wrtcSocket = require("./wrtc.sockets.js")
-// class IOClass {
-//   constructor(io) {
-//     this.io = io
-//     this.wrtcSocket = wrtcSocket(io)
-//   }
+const physicsIO = io.of("/physicsNamespace");
+const webRTCIO = io.of("/webRTCNamespace");
 
-// }
-// const myIOClass = new IOClass(io)
-// io.on("connection", (socket) => {
-//   myIOClass
-// })
+physicsSockets(physicsIO);
 
-physicsSockets(io);
-webrtcsocketlogic(io);
+//10.10.22.47
+webrtcsocketlogic(webRTCIO);

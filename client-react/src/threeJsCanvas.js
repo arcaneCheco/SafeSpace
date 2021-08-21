@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
+import useStore from "./store";
 import { io } from "socket.io-client";
 import Visuals from "./visuals";
 import { waitUntil } from "async-wait-until";
@@ -29,6 +30,8 @@ export default function threeJsCanvas() {
    * establish socket connection
    */
   const socket = io("http://localhost:3001");
+  const socket = io("http://localhost:3001/physicsNamespace");
+
   socket.on("connect", () => {
     console.log("Welcome to Safe Space");
   });
@@ -94,7 +97,7 @@ export default function threeJsCanvas() {
     visuals.renderer.render(visuals.scene, visuals.camera);
 
     // Retrieve users distances for connectionGradients
-    console.log(users);
+    // console.log(users)
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick);
