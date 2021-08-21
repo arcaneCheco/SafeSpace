@@ -93,6 +93,9 @@ export default function threeJsCanvas() {
     // Render
     visuals.renderer.render(visuals.scene, visuals.camera);
 
+    // Retrieve users distances for connectionGradients
+    console.log(users);
+
     // Call tick again on the next frame
     window.requestAnimationFrame(tick);
   };

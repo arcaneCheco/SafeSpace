@@ -27,8 +27,8 @@ const sortedListOfUsers = (distanceToOtherUsers) => {
     return distanceToOtherUsers[a] - distanceToOtherUsers[b];
   });
 };
-const radiusConnected = 2 * 15;
-const radiusDisconnected = 2 * 35;
+const radiusConnected = 2 * 7.5;
+const radiusDisconnected = 2 * 15;
 const updateConnectionGradients = (distanceToOtherUsers) => {
   const connectionGradients = {};
   for (const [userId, distance] of Object.entries(distanceToOtherUsers)) {
