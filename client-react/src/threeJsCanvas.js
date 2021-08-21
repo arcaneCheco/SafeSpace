@@ -78,7 +78,7 @@ export default function threeJsCanvas() {
   /**
    * add socketIO
    */
-  const socket = io("http://localhost:3001");
+  const socket = io("http://localhost:3001/physicsNamespace");
 
   socket.on("connect", () => {
     console.log("connect");
