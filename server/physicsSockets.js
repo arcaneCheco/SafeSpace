@@ -53,7 +53,7 @@ physics.addBoxGround();
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
-    console.log("a user connected : " + socket.id);
+    console.log("a physics sockets user connected : " + socket.id);
     console.log('users:', activeUsers)
     activeUsers[socket.id] = {
       username: `User00` + userCount++,

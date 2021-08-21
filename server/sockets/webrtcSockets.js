@@ -6,7 +6,7 @@ let receiverPCs = {}; // Saves RTCPeerConnection to receive MediaStream of conne
 let senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of another user except yourself
 let users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
 let socketToRoom = {}; // Save which room the user belongs to
-// sends list of socket ID of users already in room and sending their media stream to the server to user who is now in 
+// sends list of socket ID of users already in room and sending their media stream to the server to user who is now in
 // data.id - socketID of user joining room, data.id - roomID
 
 
@@ -16,7 +16,7 @@ module.exports = (io) => {
 
   io.on('connection', (socket) => {
 
-    console.log('io.sockets.on');
+    console.log('a webRTC user connected');
 
     socket.on('joinRoom', (data) => {
 
