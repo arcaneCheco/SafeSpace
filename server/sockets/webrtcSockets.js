@@ -22,6 +22,7 @@ module.exports = (io) => {
 
       try {
         let allUsers = webRTC.getOtherUsersInRoom(data.id, data.roomID);
+        console.log('allUsers ', data)
         io.to(data.id).emit('allUsers', { users: allUsers });
       } catch (error) {
         console.log(error);

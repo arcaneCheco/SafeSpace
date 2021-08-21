@@ -1,4 +1,5 @@
 import * as React from "react";
+import useStore from "../../store";
 import { useState } from "react";
 import io from "socket.io-client";
 import { useRef } from "react";
@@ -6,9 +7,19 @@ import { useEffect } from "react";
 import Video from "./video";
 import "./signalling.css";
 
+
+
 const Signalling: React.FC = () => {
+
   const [socket, setSocket] = useState<any>();
   const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
+
+  let activeUsers = {};
+  useStore.subscribe(() => {
+    activeUsers = useStore.getState().activeUsers
+  });
+  console.log('signalling active users', activeUsers)
+
 
   let localVideoRef = useRef<HTMLVideoElement>(null); // ref of the video on which you want to print your MediaStream
 
@@ -19,17 +30,17 @@ const Signalling: React.FC = () => {
   const pc_config = {
     iceServers: [
       // {
-      //   urls: 'stun:[STUN_IP]:[PORT]',
-      //   'credentials': '[YOR CREDENTIALS]',
-      //   'username': '[USERNAME]'
-      // },
-      {
-        urls: "stun:stun.l.google.com:19302",
-      },
-    ],
-  };
+        //   urls: 'stun:[STUN_IP]:[PORT]',
+        //   'credentials': '[YOR CREDENTIALS]',
+        //   'username': '[USERNAME]'
+        // },
+        {
+          urls: "stun:stun.l.google.com:19302",
+        },
+      ],
+    };
 
-  useEffect(() => {
+    useEffect(() => {
     let newSocket = io("http://localhost:3001/webRTCNamespace");
     let localStream: MediaStream;
 

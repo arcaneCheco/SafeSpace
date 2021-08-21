@@ -149,6 +149,7 @@ module.exports = (io) => {
           }
         );
       }
+
       socket.emit("update", activeUsers);
     }, 25);
   });
