@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
+import useStore from "./store";
 import { io } from "socket.io-client";
 import Visuals from "./visuals";
 // import { SkeletonUtils } from "three-stdlib";
@@ -13,11 +14,11 @@ export default function threeJsCanvas() {
   let avatar = null;
   let isLoaded = false;
   const users = {};
-  const activeUsersObj = {};
   const controlModes = {
     sphereUserControl: true,
     carControl: false,
   };
+
 
   // let isLoaded = false;
   window.addEventListener("resize", () => {
@@ -120,9 +121,12 @@ export default function threeJsCanvas() {
       if (users[userId]) {
         users[userId].position.copy(userData.position);
         users[userId].connectionGradients = userData.connectionGradients;
+
+
         // users[userId].quaternion.copy(userData.quaternion);
       }
     }
+    useStore.setState({activeUsers})
   });
 
   socket.on("removePlayer", (id) => {
