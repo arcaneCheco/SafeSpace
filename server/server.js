@@ -21,6 +21,18 @@ const io = socketIO(server, {
   },
 });
 
+// const wrtcSocket = require("./wrtc.sockets.js")
+// class IOClass {
+//   constructor(io) {
+//     this.io = io
+//     this.wrtcSocket = wrtcSocket(io)
+//   }
+
+// }
+// const myIOClass = new IOClass(io)
+// io.on("connection", (socket) => {
+//   myIOClass
+// })
+
 physicsSockets(io);
 webrtcsocketlogic(io);
-
