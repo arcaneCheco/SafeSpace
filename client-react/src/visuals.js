@@ -108,9 +108,10 @@ export default class Visuals {
       target.position.y + 20,
       target.position.z + 20
     );
-    this.camera.position.lerp(offset, 0.2);
+    // this.camera.position.lerp(offset, 0.2);
     this.camera.position.copy(offset);
     this.camera.lookAt(target.position);
+    // this.camera.lookAt(target.position.applyQuaternion(target.quaternion));
   }
   createSphereAvatar() {
     return new THREE.Mesh(

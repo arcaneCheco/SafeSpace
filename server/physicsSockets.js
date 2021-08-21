@@ -1,5 +1,4 @@
 const CANNON = require("cannon-es");
-const { mainModule } = require("process");
 const Physics = require("./physics");
 let activeUsers = {};
 let userCount = 0;
@@ -52,6 +51,17 @@ const physics = new Physics();
 // ground
 physics.addBoxGround();
 
+/******
+module.exports = (socket) => {
+  socket.on("fnpeq", () => {
+
+  })
+  ..
+  .
+  
+}
+*/
+
 module.exports = (io) => {
   io.on("connection", (socket) => {
     console.log("a user connected : " + socket.id);
@@ -94,24 +104,42 @@ module.exports = (io) => {
     });
 
     let carControl;
-    let direction = [0, 0, 0];
     socket.on("update", (map, controlModes) => {
       if (controlModes.carControl) {
         carControl = true;
         physics.carNavigation(car, map);
       } else {
         if (activeUsers[socket.id]) {
-          // direction = physics.turnAvatar(map);
-          // console.log(physics.userBodies[socket.id]);
-          // map.ArrowRight && (physics.userBodies[socket.id].rotation.y -= 0.1);
-          const appliedForce = physics.navigateSphereAvatar(map);
-          physics.userBodies[socket.id].applyForce(
-            appliedForce,
-            new CANNON.Vec3(0, 0, 0)
-          );
-          distances[socket.id] = updateDistances(socket.id);
-          activeUsers[socket.id].connectionGradients =
-            updateConnectionGradients(distances[socket.id]);
+          if (map.ArrowRight) {
+            activeUsers[socket.id].rotation.y -= 0.1;
+            physics.userBodies[socket.id].quaternion.setFromEuler(
+              0,
+              activeUsers[socket.id].rotation.y,
+              0
+            );
+          }
+          if (map.ArrowLeft) {
+            activeUsers[socket.id].rotation.y += 0.1;
+            physics.userBodies[socket.id].quaternion.setFromEuler(
+              0,
+              activeUsers[socket.id].rotation.y,
+              0
+            );
+          }
+          if (map.ArrowUp || map.ArrowDown) {
+            const appliedForce = physics.navigateSphereAvatar(map);
+            const directionVector =
+              physics.userBodies[socket.id].quaternion.vmult(appliedForce);
+            // physics.userBodies[socket.id].applyForce(
+            //   directionVector,
+            //   new CANNON.Vec3(0, 0, 0)
+            // );
+            physics.userBodies[socket.id].position.x += directionVector.x;
+            physics.userBodies[socket.id].position.z += directionVector.z;
+            distances[socket.id] = updateDistances(socket.id);
+            activeUsers[socket.id].connectionGradients =
+              updateConnectionGradients(distances[socket.id]);
+          }
         }
       }
     });
@@ -138,10 +166,15 @@ module.exports = (io) => {
           y: physics.userBodies[user].position.y - 1.5080219133341668 * 4 * 0.5,
           z: physics.userBodies[user].position.z,
         };
-        // if (direction.some((x) => !!x)) {
-        //   activeUsers[user].rotation.z
-        // }
-        activeUsers[user].quaternion = physics.userBodies[user].quaternion;
+        // -90deg rotation about x and 180 deg roation about z
+        activeUsers[user].quaternion = physics.userBodies[user].quaternion.mult(
+          {
+            x: 0.14630178721112524,
+            y: -0.6918061773783395,
+            z: -0.6918061773783396,
+            w: -0.14630178721112522,
+          }
+        );
       });
       if (carControl) {
         physics.updateCarWheels(car, wheelBodies);

@@ -72,18 +72,24 @@ export default function threeJsCanvas() {
   socket.on("connect", () => {
     console.log("connect");
   });
-  window.onbeforeunload = () => {
-    for (const userId of Object.keys(users)) {
-      delete users[userId];
-    }
-    socket.disconnect();
-  };
-
+  // window.onbeforeunload = () => {
+  //   for (const userId of Object.keys(users)) {
+  //     delete users[userId];
+  //   }
+  //   socket.disconnect();
+  // };
+  let goal;
+  let temp = new THREE.Vector3();
   socket.on("joined", (id, activeUsers) => {
     myId = id;
     for (const [userId, userData] of Object.entries(activeUsers)) {
       if (userId === myId) {
         users[userId] = avatar.mesh;
+        /***camera */
+        goal = new THREE.Object3D();
+        users[myId].add(goal);
+        goal.position.set(1, 10, 1);
+        /*** */
       } else {
         const newMesh = SkeletonUtils.clone(avatar.mesh);
         users[userId] = newMesh;
@@ -113,10 +119,25 @@ export default function threeJsCanvas() {
       if (users[userId]) {
         users[userId].position.copy(userData.position);
         // map.ArrowUp && users[userId].translateY(-0.1);
-        map.ArrowRight && users[userId].rotateZ(-0.1);
-        // users[userId].quaternion.copy(userData.quaternion);
+        // map.ArrowRight && users[userId].rotateZ(-0.05);
+        users[userId].quaternion.copy(userData.quaternion);
         // users[userId].rotateZ()
       }
+    }
+    /********* camera*/
+    if (users[myId]) {
+      temp.setFromMatrixPosition(goal.matrixWorld);
+      visuals.camera.position.lerp(temp, 0.2);
+      visuals.camera.lookAt(users[myId].position);
+      // let offset = new THREE.Vector3(2, 10, 10);
+      // offset.applyQuaternion(users[myId].quaternion);
+      // offset.add(users[myId].position);
+      // visuals.camera.position.copy(offset);
+      // let lookAt = new THREE.Vector3();
+      // lookAt.add(users[myId]);
+      // // lookAt.applyQuaternion(users[myId].quaternion);
+      // visuals.camera.lookAt(lookAt);
+      // // visu
     }
   });
 
@@ -173,6 +194,8 @@ export default function threeJsCanvas() {
 
   const clock = new THREE.Clock();
   let oldElapsedTime = 0;
+  let currentPos = new THREE.Vector3();
+  let currentLookAt = new THREE.Vector3();
   const tick = () => {
     const elapsedTime = clock.getElapsedTime();
     const deltaTime = elapsedTime - oldElapsedTime;
@@ -183,13 +206,10 @@ export default function threeJsCanvas() {
 
     // update camera
     if (myId && users[myId] && !manualControl) {
-      visuals.updateAvatarModeCamera(users[myId]);
+      // visuals.updateAvatarModeCamera(users[myId]);
     }
     //update animaations
-    if (
-      isLoaded &&
-      (map.ArrowUp || map.ArrowDown || map.ArrowLeft || map.ArrowRight)
-    ) {
+    if (isLoaded && (map.ArrowUp || map.ArrowDown)) {
       avatar.mixer.update(deltaTime);
     }
 

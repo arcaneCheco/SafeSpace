@@ -35,7 +35,7 @@ class Physics {
     });
     sphereBody.addShape(sphereShape);
     sphereBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
-    sphereBody.position.y = 5;
+    sphereBody.position.y = 8;
     sphereBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
     this.world.addBody(sphereBody);
     this.userBodies[id] = sphereBody;
@@ -76,7 +76,7 @@ class Physics {
     });
     // boxBody.addShape(boxShape);
     cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
-    cylBody.position.y = 10;
+    cylBody.position.y = 12;
     cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
     this.world.addBody(cylBody);
     this.userBodies[id] = cylBody;
@@ -201,12 +201,12 @@ class Physics {
     }
   }
   navigateSphereAvatar(map) {
-    const force = 250;
+    const force = 1;
     const appliedForce = [0, 0, 0];
     if (map.ArrowUp) appliedForce[2] = appliedForce[2] - force;
-    if (map.ArrowRight) appliedForce[0] = appliedForce[0] + force;
+    // if (map.ArrowRight) appliedForce[0] = appliedForce[0] + force;
     if (map.ArrowDown) appliedForce[2] = appliedForce[2] + force;
-    if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
+    // if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
     return new CANNON.Vec3(...appliedForce);
   }
   turnAvatar(map) {
@@ -220,6 +220,16 @@ class Physics {
     if (map.ArrowDown) direction[1] += 2;
     if (map.ArrowLeft) direction[1] += 3;
     return direction;
+  }
+  moveAvatarByPostion(map) {
+    let force;
+    let appliedForce = [0, 0, 0];
+    // if (map.ArrowUp) direction[2] = 1;
+    // if (map.ArrowRight) direction[0] = 1;
+    // if (map.ArrowDown) direction[2] = -1;
+    // if (map.ArrowLeft) direction[0] = -1;
+    // if (map.ArrowUp) direction[1] += 1;
+    return new CANNON.Vec3(...appliedForce);
   }
 }
 module.exports = Physics;
