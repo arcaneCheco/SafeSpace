@@ -16,13 +16,11 @@ module.exports = (io) => {
 
   io.on('connection', (socket) => {
 
-    console.log('a webRTC user connected');
-
     socket.on('joinRoom', (data) => {
 
+      console.log('web RTCUsers ', data)
       try {
         let allUsers = webRTC.getOtherUsersInRoom(data.id, data.roomID);
-        console.log('allUsers ', data)
         io.to(data.id).emit('allUsers', { users: allUsers });
       } catch (error) {
         console.log(error);

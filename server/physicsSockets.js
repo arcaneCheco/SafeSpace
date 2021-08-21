@@ -53,8 +53,6 @@ physics.addBoxGround();
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
-    console.log("a physics sockets user connected : " + socket.id);
-    console.log('users:', activeUsers)
     activeUsers[socket.id] = {
       username: `User00` + userCount++,
       position: { x: 0, y: 0, z: 0 },
@@ -62,6 +60,7 @@ module.exports = (io) => {
       connectionGradients: {},
     };
     activeUsers[socket.id].bodyId = physics.createAndAddCylAvatar(socket.id);
+    console.log('physics users:', activeUsers)
 
     // create Car
     // const chassisBody = physics.createCarChassis();
