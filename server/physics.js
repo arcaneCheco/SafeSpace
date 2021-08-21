@@ -5,7 +5,7 @@ class Physics {
     this.world = new CANNON.World();
     this.world.broadphase = new CANNON.SAPBroadphase(this.world);
     this.world.gravity.set(0, -9.81, 0);
-    // this.world.allowSleep = true;
+    this.world.allowSleep = true;
     this.userBodies = {};
     // this.world.defaultContactMaterial.friction = 0;
     this.groundMaterial = new CANNON.Material("groundMaterial");
@@ -42,7 +42,6 @@ class Physics {
     return sphereBody.id;
   }
   createAndAddBoxAvatar(id) {
-    // const trans = new CANNON.Transform({ position: new CANNON.Vec3(4, 0, 0) });
     const boxShape = new CANNON.Box(
       new CANNON.Vec3(
         (1.140032197089109 / 2) * 8,
@@ -55,9 +54,9 @@ class Physics {
       material: this.userMaterial,
       angularDamping: 0.9,
       fixedRotation: true,
-      shape: boxShape,
+      // shape: boxShape,
     });
-    // boxBody.addShape(boxShape);
+    boxBody.addShape(boxShape);
     boxBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
     boxBody.position.y = 10;
     boxBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
@@ -66,7 +65,7 @@ class Physics {
     return boxBody.id;
   }
   createAndAddCylAvatar(id) {
-    const cylShape = new CANNON.Cylinder(0.7, 0.7, 1.5080219133341668 * 4, 6);
+    const cylShape = new CANNON.Cylinder(0.7, 0.7, 1.5080219133341668 * 4, 12);
     const cylBody = new CANNON.Body({
       mass: 1,
       material: this.userMaterial,
@@ -75,9 +74,12 @@ class Physics {
       shape: cylShape,
     });
     // boxBody.addShape(boxShape);
-    cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
-    cylBody.position.y = 12;
-    cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
+    cylBody.position.x = -49;
+    cylBody.position.y = 300;
+    cylBody.position.z = 0;
+    // cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
+    // cylBody.position.y = 12;
+    // cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
     this.world.addBody(cylBody);
     this.userBodies[id] = cylBody;
     return cylBody.id;
@@ -201,6 +203,7 @@ class Physics {
     }
   }
   navigateSphereAvatar(map) {
+    // const force = 450;
     const force = 1;
     const appliedForce = [0, 0, 0];
     if (map.ArrowUp) appliedForce[2] = appliedForce[2] - force;
@@ -209,45 +212,5 @@ class Physics {
     // if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
     return new CANNON.Vec3(...appliedForce);
   }
-  turnAvatar(map) {
-    let direction = [0, 0, 0];
-    // if (map.ArrowUp) direction[2] = 1;
-    // if (map.ArrowRight) direction[0] = 1;
-    // if (map.ArrowDown) direction[2] = -1;
-    // if (map.ArrowLeft) direction[0] = -1;
-    // if (map.ArrowUp) direction[1] += 1;
-    if (map.ArrowRight) direction[1] += 1;
-    if (map.ArrowDown) direction[1] += 2;
-    if (map.ArrowLeft) direction[1] += 3;
-    return direction;
-  }
-  moveAvatarByPostion(map) {
-    let force;
-    let appliedForce = [0, 0, 0];
-    // if (map.ArrowUp) direction[2] = 1;
-    // if (map.ArrowRight) direction[0] = 1;
-    // if (map.ArrowDown) direction[2] = -1;
-    // if (map.ArrowLeft) direction[0] = -1;
-    // if (map.ArrowUp) direction[1] += 1;
-    return new CANNON.Vec3(...appliedForce);
-  }
 }
 module.exports = Physics;
-// const physics = new Physics();
-// console.log(physics.world);
-// const car = physics.createCar(0.7);
-// car.addToWorld(physics.world);
-// let wheels = physics.createWheelBodies(car);
-// console.log(wheels);
-//
-// const deltaPosition = 0.1;
-// const navigateThroughPosition = (map) => {
-//   const positionVector = [0, 0, 0];
-//   if (map.ArrowUp) {
-//     positionVector[2] = positionVector[2] - deltaPosition;
-//   }
-//   if (map.ArrowRight) positionVector[0] = positionVector[0] + deltaPosition;
-//   if (map.ArrowDown) positionVector[2] = positionVector[2] + deltaPosition;
-//   if (map.ArrowLeft) positionVector[0] = positionVector[0] - deltaPosition;
-//   return positionVector;
-// };

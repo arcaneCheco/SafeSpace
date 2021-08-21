@@ -51,17 +51,6 @@ const physics = new Physics();
 // ground
 physics.addBoxGround();
 
-/******
-module.exports = (socket) => {
-  socket.on("fnpeq", () => {
-
-  })
-  ..
-  .
-  
-}
-*/
-
 module.exports = (io) => {
   io.on("connection", (socket) => {
     console.log("a user connected : " + socket.id);
@@ -99,7 +88,7 @@ module.exports = (io) => {
         delete activeUsers[socket.id];
         physics.world.removeBody(physics.userBodies[socket.id]);
         delete physics.userBodies[socket.id];
-        io.emit("removePlayer", socket.id);
+        io.emit("removeUser", socket.id);
       }
     });
 
@@ -136,6 +125,7 @@ module.exports = (io) => {
             // );
             physics.userBodies[socket.id].position.x += directionVector.x;
             physics.userBodies[socket.id].position.z += directionVector.z;
+            physics.userBodies[socket.id].wakeUp();
             distances[socket.id] = updateDistances(socket.id);
             activeUsers[socket.id].connectionGradients =
               updateConnectionGradients(distances[socket.id]);
