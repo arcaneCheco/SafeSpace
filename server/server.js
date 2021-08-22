@@ -3,6 +3,7 @@ const socketIO = require("socket.io");
 const wrtc = require("wrtc");
 const physicsSockets = require("./physicsSockets");
 const webrtcsocketlogic = require("./sockets/webrtcSockets");
+const uuidv1 = require('uuid/v1');
 
 const PORT = 3001;
 const app = express();
@@ -20,6 +21,10 @@ const io = socketIO(server, {
     origin: "*",
   },
 });
+
+
+
+let userId = uuidv1();
 
 const physicsIO = io.of("/physicsNamespace");
 const webRTCIO = io.of("/webRTCNamespace");

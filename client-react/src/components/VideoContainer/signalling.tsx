@@ -11,14 +11,15 @@ import "./signalling.css";
 
 const Signalling: React.FC = () => {
 
-  const [socket, setSocket] = useState<any>();
-  const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
-
+  // Get active users from store
   let activeUsers = {};
   useStore.subscribe(() => {
     activeUsers = useStore.getState().activeUsers
+    console.log('signalling active users', activeUsers)
   });
-  console.log('signalling active users', activeUsers)
+
+  const [socket, setSocket] = useState<any>();
+  const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
 
 
   let localVideoRef = useRef<HTMLVideoElement>(null); // ref of the video on which you want to print your MediaStream
@@ -320,7 +321,13 @@ const Signalling: React.FC = () => {
     return pc;
   };
 
+  // Insert opacity values into users array
+
+  console.log('signalling active users', activeUsers)
+
+
   // +++++++ VIDEO RENDERING +++++++ //
+
   const opacity = 0.5;
   return (
     <div className="Signalling">

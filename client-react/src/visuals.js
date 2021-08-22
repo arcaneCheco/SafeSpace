@@ -90,7 +90,7 @@ export default class Visuals {
         this.userMeshes[userId].quaternion.copy(userData.quaternion);
       }
     }
-    useStore.setState({ activeUsers: activeUsers })
+
     // updateThirdPersonViewPerspective()
   }
   // updateThirdPersonViewPerspective() {

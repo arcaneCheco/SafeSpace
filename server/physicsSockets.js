@@ -55,6 +55,7 @@ module.exports = (io) => {
   io.on("connection", (socket) => {
     activeUsers[socket.id] = {
       username: `User00` + userCount++,
+      physicsSocketId: socket.id,
       position: { x: 0, y: 0, z: 0 },
       rotation: { x: 0, y: 0, y: 0 },
       quaternion: { x: 0, y: 0, z: 0, w: 0 },
@@ -94,6 +95,8 @@ module.exports = (io) => {
 
     let carControl;
     socket.on("update", (map, controlModes) => {
+      activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid
+
       if (controlModes.carControl) {
         carControl = true;
         physics.carNavigation(car, map);
@@ -180,7 +183,6 @@ module.exports = (io) => {
           }
         );
       }
-
       socket.emit("update", activeUsers);
     }, 25);
   });

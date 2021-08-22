@@ -60,7 +60,10 @@ export default function threeJsCanvas() {
 
   socket.on("add new user", (id, newUser) => visuals.addNewUser(id, newUser));
 
-  socket.on("update", (activeUsers) => visuals.updateUserStates(activeUsers));
+  socket.on("update", (activeUsers) => {
+    visuals.updateUserStates(activeUsers);
+    useStore.setState({ activeUsers: activeUsers });
+  });
 
   socket.on("removeUser", (id) => visuals.removeUser(id));
 
