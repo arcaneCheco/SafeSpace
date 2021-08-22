@@ -15,7 +15,9 @@ const Signalling: React.FC = () => {
   let activeUsers = {};
   useStore.subscribe(() => {
     activeUsers = useStore.getState().activeUsers
-    console.log('signalling active users', activeUsers)
+    console.log('Active users', activeUsers)
+    console.log('users', users)
+
   });
 
   const [socket, setSocket] = useState<any>();
@@ -323,12 +325,13 @@ const Signalling: React.FC = () => {
 
   // Insert opacity values into users array
 
+    const opacity = 0.5;
+    // opacity={user.connectionGradients.userId}
+
   console.log('signalling active users', activeUsers)
 
 
   // +++++++ VIDEO RENDERING +++++++ //
-
-  const opacity = 0.5;
   return (
     <div className="Signalling">
       <div className="usersVideosBox">
