@@ -8,8 +8,8 @@ const useStore = create<store>((set) => ({
   activeUsers: {}
 }));
 
-// useStore.subscribe(() => {
-//   console.log('new state', useStore.getState());
-// })
+useStore.subscribe(() => {
+  console.log('new state', useStore.getState());
+})
 
 export default useStore;

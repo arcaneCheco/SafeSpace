@@ -321,12 +321,12 @@ const Signalling: React.FC = () => {
   };
 
   // +++++++ VIDEO RENDERING +++++++ //
-
+  const opacity = 0.5;
   return (
     <div className="Signalling">
       <div className="usersVideosBox">
           {users.map((user, index) => {
-            return <Video key={index} stream={user.stream} />;
+            return <Video key={index} stream={user.stream} opacity={opacity} />;
           })}
       </div>
       <div className="userVideo">

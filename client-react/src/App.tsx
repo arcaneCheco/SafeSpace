@@ -9,15 +9,6 @@ const App = () => {
     threeJsCanvas();
   }, []);
 
-  // let distances = useDistancesStore(state => state.distances)
-  // setDistance = useDistancesStore(state => state.setDistancers)
-  // setDistances(updates)
-
-  // usedistancesStore.subscribe(
-  //   (prev, next) => (distances = next)
-  // );
-
-
   return (
     <div>
       <Signalling />
