@@ -2,10 +2,14 @@ import create from 'zustand';
 
 type store = {
   activeUsers: any;
+  userSpecificId: string;
+  userConnectionGradients: any;
 };
 
 const useStore = create<store>((set) => ({
-  activeUsers: {}
+  activeUsers: {},
+  userSpecificId: '',
+  userConnectionGradients: {}
 }));
 
 // useStore.subscribe(() => {

@@ -5,9 +5,10 @@ interface Props {
   stream: MediaStream;
   muted?: boolean;
   opacity: number;
+  userConnectionGradients: {};
 }
 
-const Video = ({ stream, muted, opacity }: Props) => {
+const Video = ({ stream, muted, opacity, userConnectionGradients }: Props) => {
   const ref = useRef<HTMLVideoElement>(null);
   // const [isMuted, setIsMuted] = useState<boolean>(false);
 

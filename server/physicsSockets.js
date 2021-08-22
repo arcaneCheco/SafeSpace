@@ -75,6 +75,7 @@ module.exports = (io) => {
 
     socket.on("model loaded", () => {
       socket.emit("joined", socket.id, activeUsers);
+      io.to(socket.id).emit('userSpecificId', socket.id);
       socket.broadcast.emit("add new user", socket.id, activeUsers[socket.id]);
     });
 
@@ -184,6 +185,7 @@ module.exports = (io) => {
         );
       }
       socket.emit("update", activeUsers);
+      activeUsers[socket.id] && io.to(socket.id).emit('userConnectionGradients', activeUsers[socket.id].connectionGradients);
     }, 25);
   });
 };
