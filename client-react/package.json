@@ -17,6 +17,7 @@
     "@types/socket.io-client": "^3.0.0",
     "@types/styled-components": "^5.1.12",
     "@types/webrtc": "^0.0.30",
+    "async-wait-until": "^2.0.7",
     "cannon-es": "^0.18.0",
     "cannon-es-debugger": "^0.1.4",
     "react": "^17.0.2",

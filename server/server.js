@@ -21,11 +21,10 @@ const io = socketIO(server, {
   },
 });
 
-const physicsIO = io.of('/physicsNamespace');
-const webRTCIO = io.of('/webRTCNamespace');
+const physicsIO = io.of("/physicsNamespace");
+const webRTCIO = io.of("/webRTCNamespace");
 
 physicsSockets(physicsIO);
 
 //10.10.22.47
 webrtcsocketlogic(webRTCIO);
-
