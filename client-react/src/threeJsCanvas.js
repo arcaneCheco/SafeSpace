@@ -58,6 +58,8 @@ export default function threeJsCanvas() {
     }, 50);
   });
 
+  socket.on('userSpecificId', (userSpecificId) => useStore.setState({ userSpecificId: userSpecificId }));
+
   socket.on("add new user", (id, newUser) => visuals.addNewUser(id, newUser));
 
   socket.on("update", (activeUsers) => {

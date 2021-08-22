@@ -13,10 +13,15 @@ const Signalling: React.FC = () => {
 
   // Get active users from store
   let activeUsers = {};
+  let userSpecificId = '';
+  let userConnectionGradients = {};
   useStore.subscribe(() => {
-    activeUsers = useStore.getState().activeUsers
-    console.log('Active users', activeUsers)
-    console.log('users', users)
+    activeUsers = useStore.getState().activeUsers;
+    userSpecificId = useStore.getState().userSpecificId
+    userConnectionGradients = useStore.getState().userConnectionGradients
+    // console.log('user specific', activeUsers.userSpecificId)
+
+    console.log('users', userConnectionGradients)
 
   });
 
@@ -326,6 +331,7 @@ const Signalling: React.FC = () => {
   // Insert opacity values into users array
 
     const opacity = 0.5;
+    // let temp = activeUsers[userSpecificId].connectionGradients
     // opacity={user.connectionGradients.userId}
 
   console.log('signalling active users', activeUsers)
@@ -336,7 +342,7 @@ const Signalling: React.FC = () => {
     <div className="Signalling">
       <div className="usersVideosBox">
           {users.map((user, index) => {
-            return <Video key={index} stream={user.stream} opacity={opacity} />;
+            return <Video key={index} stream={user.stream} opacity={opacity} userConnectionGradients={userConnectionGradients} />;
           })}
       </div>
       <div className="userVideo">
