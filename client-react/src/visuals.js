@@ -69,7 +69,7 @@ export default class Visuals {
       e.key === "ArrowLeft"
     )
       this.map[e.key] = e.type === "keydown";
-    console.log(this.map);
+    // console.log(this.map);
   }
   resize() {
     // Update sizes

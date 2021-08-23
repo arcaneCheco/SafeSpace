@@ -1,5 +1,5 @@
 const wrtc = require("wrtc");
-const socketIO = require("socket.io");
+const socketIO = require("socket.io");//Obsolete?
 
 class WebRTCFuncs {
   constructor() {

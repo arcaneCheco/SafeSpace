@@ -62,7 +62,10 @@ module.exports = (io) => {
       connectionGradients: {},
     };
     activeUsers[socket.id].bodyId = physics.createAndAddCylAvatar(socket.id);
-    console.log('physics users:', activeUsers)
+    // console.log('physics users:', activeUsers)
+
+    // Share physics Socket across to physics namespace
+    socket.client.physicsSocketid = socket.id;
 
     // create Car
     // const chassisBody = physics.createCarChassis();

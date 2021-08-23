@@ -19,10 +19,14 @@ module.exports = (io) => {
       webRTCUsers[socket.id] = {
         webRTCSocketId: socket.id,
       };
+
+      // Share WebRTC Socket across to physics namespace
       socket.client.webRTCSocketid = socket.id;
-      console.log(socket.client.webRTCSocketid)
+      // Receive physics Socket id
+      webRTCUsers[socket.id].physicsSocketid = socket.client.physicsSocketid
 
       console.log("web RTCUsers ", webRTCUsers);
+
       try {
         let allUsers = webRTC.getOtherUsersInRoom(data.id, data.roomID);
         io.to(data.id).emit("allUsers", { users: allUsers });
@@ -109,6 +113,8 @@ module.exports = (io) => {
     socket.on("disconnect", () => {
       if (webRTCUsers && webRTCUsers[socket.id]) {
         delete webRTCUsers[socket.id];
+        console.log("web RTCUsers ", webRTCUsers);
+
       }
       try {
         let roomID = socketToRoom[socket.id];

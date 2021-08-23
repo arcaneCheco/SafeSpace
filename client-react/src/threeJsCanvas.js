@@ -30,6 +30,9 @@ export default function threeJsCanvas() {
    * establish socket connection
    */
   const socket = io("http://localhost:3001/physicsNamespace");
+  //NGROK
+  // const socket = io("https://acde-82-163-118-2.ngrok.io/physicsNamespace");
+
 
   socket.on("connect", () => {
     console.log("Welcome to Safe Space");

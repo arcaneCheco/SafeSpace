@@ -7,27 +7,22 @@ import { useEffect } from "react";
 import Video from "./video";
 import "./signalling.css";
 
-
-
 const Signalling: React.FC = () => {
-
   // Get active users from store
   let activeUsers = {};
-  let userSpecificId = '';
+  let userSpecificId = "";
   let userConnectionGradients = {};
   useStore.subscribe(() => {
     activeUsers = useStore.getState().activeUsers;
-    userSpecificId = useStore.getState().userSpecificId
-    userConnectionGradients = useStore.getState().userConnectionGradients
+    userSpecificId = useStore.getState().userSpecificId;
+    userConnectionGradients = useStore.getState().userConnectionGradients;
     // console.log('user specific', activeUsers.userSpecificId)
 
-    console.log('users', userConnectionGradients)
-
+    // console.log('users', userConnectionGradients)
   });
 
   const [socket, setSocket] = useState<any>();
   const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
-
 
   let localVideoRef = useRef<HTMLVideoElement>(null); // ref of the video on which you want to print your MediaStream
 
@@ -38,18 +33,21 @@ const Signalling: React.FC = () => {
   const pc_config = {
     iceServers: [
       // {
-        //   urls: 'stun:[STUN_IP]:[PORT]',
-        //   'credentials': '[YOR CREDENTIALS]',
-        //   'username': '[USERNAME]'
-        // },
-        {
-          urls: "stun:stun.l.google.com:19302",
-        },
-      ],
-    };
+      //   urls: 'stun:[STUN_IP]:[PORT]',
+      //   'credentials': '[YOR CREDENTIALS]',
+      //   'username': '[USERNAME]'
+      // },
+      {
+        urls: "stun:stun.l.google.com:19302",
+      },
+    ],
+  };
 
-    useEffect(() => {
+  useEffect(() => {
     let newSocket = io("http://localhost:3001/webRTCNamespace");
+    //NGROK
+    // let newSocket = io("https://acde-82-163-118-2.ngrok.io/webRTCNamespace");
+
     let localStream: MediaStream;
 
     newSocket.on("connection", () => {
@@ -59,6 +57,8 @@ const Signalling: React.FC = () => {
     // Generates RTCPeerConnection to receive MediaStream then sent to server (needs to be in userJoined in client.js)
     newSocket.on("userEnter", (data: { id: string }) => {
       createReceivePC(data.id, newSocket);
+      setUsers((users) => users.filter((user) => user.id !== data.id));
+      console.log('user Entered: ', users)
     });
 
     // Generates RTC PeerConnection to receive MediaStream fromm those users, sends to server
@@ -197,7 +197,7 @@ const Signalling: React.FC = () => {
         offerToReceiveAudio: false,
         offerToReceiveVideo: false,
       });
-      console.log("create sender offer success");
+      // console.log("create sender offer success");
       await sendPC.setLocalDescription(new RTCSessionDescription(sdp));
 
       newSocket.emit("senderOffer", {
@@ -225,7 +225,7 @@ const Signalling: React.FC = () => {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true,
       });
-      console.log("create receiver offer success");
+      // console.log("create receiver offer success");
       await pc.setLocalDescription(new RTCSessionDescription(sdp));
 
       newSocket.emit("receiverOffer", {
@@ -267,7 +267,7 @@ const Signalling: React.FC = () => {
     };
 
     if (localStream) {
-      console.log("localstream add");
+      // console.log("localstream add");
       localStream.getTracks().forEach((track) => {
         pc.addTrack(track, localStream);
       });
@@ -330,20 +330,31 @@ const Signalling: React.FC = () => {
 
   // Insert opacity values into users array
 
-    const opacity = 0.5;
-    // let temp = activeUsers[userSpecificId].connectionGradients
-    // opacity={user.connectionGradients.userId}
+  const opacity = 1;
+  // let temp = activeUsers[userSpecificId].connectionGradients
+  // opacity={user.connectionGradients.userId}
 
-  console.log('signalling active users', activeUsers)
-
+  console.log("signalling active users", activeUsers);
 
   // +++++++ VIDEO RENDERING +++++++ //
   return (
     <div className="Signalling">
       <div className="usersVideosBox">
-          {users.map((user, index) => {
-            return <Video key={index} stream={user.stream} opacity={opacity} userConnectionGradients={userConnectionGradients} />;
-          })}
+        {users.map((user, index) => {
+          {
+            console.log("video here", user);
+            console.log("userConnectionGradients ", userConnectionGradients);
+          }
+
+          return (
+            <Video
+              key={index}
+              stream={user.stream}
+              opacity={opacity}
+              userConnectionGradients={userConnectionGradients}
+            />
+          );
+        })}
       </div>
       <div className="userVideo">
         <div className="videoBox">
