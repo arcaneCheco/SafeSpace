@@ -126,6 +126,19 @@ export default class Visuals {
       this.avatar.isLoaded = true;
     });
   }
+
+  loadFox() {
+    this.gltfLoader.load('/models/Fox/glTF/Fox.gltf', (gltf) =>
+    {
+        gltf.scene.scale.set(0.08, 0.08, 0.08)
+        this.scene.add(gltf.scene)
+
+        // Animation
+        // mixer = new THREE.AnimationMixer(gltf.scene)
+        // const action = mixer.clipAction(gltf.animations[2])
+        // action.play()
+    })
+  }
   configRenderer() {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;

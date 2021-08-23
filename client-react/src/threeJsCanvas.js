@@ -2,13 +2,8 @@ import * as THREE from "three";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import useStore from "./store";
 import { io } from "socket.io-client";
-<<<<<<< HEAD
-import { aWonderfulWorld } from "./aWonderfulWorld";
-// import Visuals from "./visuals"; commented out for dev Daniel
-=======
 import Visuals from "./visuals";
 import { waitUntil } from "async-wait-until";
->>>>>>> development
 
 export default function threeJsCanvas() {
   /**
@@ -30,6 +25,8 @@ export default function threeJsCanvas() {
   visuals.scene.add(helper);
   const ambientLight = new THREE.AmbientLight();
   visuals.scene.add(ambientLight);
+  visuals.loadFox();
+
 
   /**
    * establish socket connection
