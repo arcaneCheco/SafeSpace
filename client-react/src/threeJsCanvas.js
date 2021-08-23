@@ -1,85 +1,141 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
+import useStore from "./store";
 import { io } from "socket.io-client";
+<<<<<<< HEAD
 import { aWonderfulWorld } from "./aWonderfulWorld";
 // import Visuals from "./visuals"; commented out for dev Daniel
+=======
+import Visuals from "./visuals";
+import { waitUntil } from "async-wait-until";
+>>>>>>> development
 
-const threeJsCanvas = () => {
+export default function threeJsCanvas() {
+  /**
+   * initialise threejs world
+   **/
+  const canvas = document.querySelector("#canvas");
+  const visuals = new Visuals(canvas);
+
+  /*
+   * Misc
+   */
   let myId = "";
-  let updateInterval;
-  const users = {};
-
-  const map = {};
-  document.onkeydown = document.onkeyup = (e) => {
-    if (
-      e.key === "ArrowUp" ||
-      e.key === "ArrowRight" ||
-      e.key === "ArrowDown" ||
-      e.key === "ArrowLeft"
-    )
-      map[e.key] = e.type === "keydown";
+  const controlModes = {
+    sphereUserControl: true,
+    carControl: false,
   };
+  const gui = new GUI();
+  const helper = new THREE.GridHelper();
+  visuals.scene.add(helper);
+  const ambientLight = new THREE.AmbientLight();
+  visuals.scene.add(ambientLight);
 
   /**
-   * add socketIO
+   * establish socket connection
    */
-  const socket = io("http://localhost:3001");
+  const socket = io("http://localhost:3001/physicsNamespace");
+
   socket.on("connect", () => {
-    console.log("connect");
+    console.log("Welcome to Safe Space");
   });
+
+  /**
+   * load player model
+   **/
+  let isLoaded = false;
+  waitUntil(() => visuals.avatar.isLoaded === true).then(() => {
+    isLoaded = true;
+    socket.emit("model loaded");
+  });
+
+  let goal;
+  let temp = new THREE.Vector3();
+  /***camera, inside joined if (userId === myId) block */
+  // goal = new THREE.Object3D();
+  // visuals.userMeshes[myId].add(goal);
+  // goal.position.set(1, 10, 2);
+  /*** */
   socket.on("joined", (id, activeUsers) => {
-    myId = id;
-    console.log(activeUsers);
-    for (const [userId, userData] of Object.entries(activeUsers)) {
-      users[userId] = new THREE.Mesh(
-        new THREE.SphereGeometry(1),
-        new THREE.MeshStandardMaterial({ color: 0xff0000 })
-      );
-      users[userId].name = userData.username;
-      users[userId].position.copy(userData.position);
-      scene.add(users[userId]);
-    }
-    updateInterval = setInterval(() => {
-      socket.emit("update", map);
+    visuals.joiningUser(id, activeUsers);
+    setInterval(() => {
+      socket.emit("update", visuals.map, controlModes);
     }, 50);
   });
-  socket.on("add new user", (id, newUser) => {
-    users[id] = new THREE.Mesh(
-      new THREE.SphereGeometry(1),
-      new THREE.MeshStandardMaterial({ color: 0xff0000 })
-    );
-    users[id].name = newUser.username;
-    users[id].position.copy(newUser.position);
-    scene.add(users[id]);
-  });
+
+  socket.on('userSpecificId', (userSpecificId) => useStore.setState({ userSpecificId: userSpecificId }));
+
+  socket.on("add new user", (id, newUser) => visuals.addNewUser(id, newUser));
+
   socket.on("update", (activeUsers) => {
-    for (const [userId, userData] of Object.entries(activeUsers)) {
-      if (users[userId]) {
-        users[userId].position.copy(userData.position);
-        users[userId].quaternion.copy(userData.quaternion);
-      }
+    visuals.updateUserStates(activeUsers);
+    useStore.setState({ activeUsers: activeUsers });
+  });
+
+  socket.on("removeUser", (id) => visuals.removeUser(id));
+
+  /************ */
+  let manualControl = false; // make this a click down event to enable orbit controls
+  document.onmousedown = () => (manualControl = true);
+  document.onmouseup = () => (manualControl = false);
+
+  const clock = new THREE.Clock();
+  let oldElapsedTime = 0;
+  const tick = () => {
+    const elapsedTime = clock.getElapsedTime();
+    const deltaTime = elapsedTime - oldElapsedTime;
+    oldElapsedTime = elapsedTime;
+
+    // Update controls
+    visuals.orbitControls.update();
+
+    // update camera
+    if (
+      visuals.userId &&
+      visuals.userMeshes[visuals.userId] &&
+      !manualControl
+    ) {
+      visuals.updateAvatarModeCamera(visuals.userMeshes[visuals.userId]);
     }
-  });
+    //update animaations
+    if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
+      visuals.avatar.mixer.update(deltaTime);
+    }
 
-  socket.on("removePlayer", (id) => {
-    console.log(scene);
-    scene.remove(scene.getObjectByName(users[id].name));
-    // clearInterval(updateInterval);
-    delete users[id];
-  });
+    // Render
+    visuals.renderer.render(visuals.scene, visuals.camera);
 
-  socket.on("active users ordered", (orderedUserList) => {
-    // console.log(orderedUserList);
-  });
-  /**
-   * THREE JS STUFF
-   */
-  const canvas = document.querySelector("#canvas");
+    // Retrieve users distances for connectionGradients
+    // console.log(users)
 
-  const scene = new THREE.Scene();
+    // Call tick again on the next frame
+    window.requestAnimationFrame(tick);
+  };
+  tick();
+}
 
-  aWonderfulWorld(scene, canvas);
-};
+// // car
+// const carMesh = visuals.createCarMesh();
+// // inital position
+// carMesh.position.set(0, 0.2, 0);
+// carMesh.quaternion.set(0, 0, 0, 1);
+// visuals.scene.add(carMesh);
+// // car wheels
+// const wheels = visuals.createWheels();
+// for (const wheelMesh of wheels) {
+//   visuals.scene.add(wheelMesh);
+// }
+// socket.on("update wheels", (wheelsState, carState) => {
+//   // console.log(carState.position);
+//   // console.log(map);
+//   carMesh.position.copy(carState.position);
+//   carMesh.quaternion.copy(carState.quaternion);
+//   for (let i = 0; i < wheelsState.length; i++) {
+//     wheels[i].position.copy(wheelsState[i].position);
+//     wheels[i].quaternion.copy(wheelsState[i].quaternion);
+//   }
+// });
 
-export { threeJsCanvas };
+// socket.on("active users ordered", (orderedUserList) => {
+//   console.log(orderedUserList);
+// });

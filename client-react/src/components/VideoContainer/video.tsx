@@ -1,53 +1,36 @@
-// import React, { useEffect, useRef, useState } from 'react';
-// import Styled from 'styled-components';
+import React, { useEffect, useRef, useState } from 'react';
+import './video.css';
 
+interface Props {
+  stream: MediaStream;
+  muted?: boolean;
+  opacity: number;
+  userConnectionGradients: {};
+}
 
-// const ContainerStyled = Styled.div`
-//    position: relative;
-//    display: inline-block;
-//    width: 240px;
-//    height: 240px;
-//    margin: 5px;
-// `;
+const Video = ({ stream, muted, opacity, userConnectionGradients }: Props) => {
+  const ref = useRef<HTMLVideoElement>(null);
+  // const [isMuted, setIsMuted] = useState<boolean>(false);
 
-// const VideoContainerStyled = Styled.video`
-//    width: 240px;
-//    height: 240px;
-//    background-color: black;
-// `;
+  // const ref = useRef(null);
+  const [isMuted, setIsMuted] = useState(false);
 
-// interface Props {
-//   stream: MediaStream;
-//   muted?: boolean;
-// }
+  useEffect(() => {
+    if (ref.current) ref.current.srcObject = stream;
+    if (muted) setIsMuted(muted);
+  },[])
 
-// const Video = ({ stream, muted }: Props) => {
-//   // const ref = useRef<HTMLVideoElement>(null);
-//   // const [isMuted, setIsMuted] = useState<boolean>(false);
-
-//   const ref = useRef(null);
-//   const [isMuted, setIsMuted] = useState(false);
-
-//   useEffect(() => {
-//     if (ref.current) ref.current.srcObject = stream;
-//     if (muted) setIsMuted(muted);
-//   })
-
-//   return (
-//     <ContainerStyled>
-//       <VideoContainerStyled
-//         ref={ref}
-//         muted={isMuted}
-//         autoPlay
-//       ></VideoContainerStyled>
-//     </ContainerStyled>
-//   );
-// }
-
-import React from 'react'
-
-const Video = () => {
-
+  return (
+    <div className='videoSingle' >
+      <video
+      style={{opacity: opacity}}
+      className='videoTileSingle'
+        ref={ref}
+        muted={isMuted}
+        autoPlay
+      ></video>
+    </div>
+  );
 }
 
 

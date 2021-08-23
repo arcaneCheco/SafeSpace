@@ -35,11 +35,54 @@ class Physics {
     });
     sphereBody.addShape(sphereShape);
     sphereBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
-    sphereBody.position.y = 5;
-    (sphereBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5),
-      this.world.addBody(sphereBody);
+    sphereBody.position.y = 8;
+    sphereBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
+    this.world.addBody(sphereBody);
     this.userBodies[id] = sphereBody;
     return sphereBody.id;
+  }
+  createAndAddBoxAvatar(id) {
+    const boxShape = new CANNON.Box(
+      new CANNON.Vec3(
+        (1.140032197089109 / 2) * 8,
+        (1.5080219133341668 / 2) * 8,
+        (0.3135272997496078 / 2) * 8
+      )
+    );
+    const boxBody = new CANNON.Body({
+      mass: 1,
+      material: this.userMaterial,
+      angularDamping: 0.9,
+      fixedRotation: true,
+      // shape: boxShape,
+    });
+    boxBody.addShape(boxShape);
+    boxBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
+    boxBody.position.y = 10;
+    boxBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
+    this.world.addBody(boxBody);
+    this.userBodies[id] = boxBody;
+    return boxBody.id;
+  }
+  createAndAddCylAvatar(id) {
+    const cylShape = new CANNON.Cylinder(0.7, 0.7, 1.5080219133341668 * 4, 12);
+    const cylBody = new CANNON.Body({
+      mass: 1,
+      material: this.userMaterial,
+      // angularDamping: 0.9,
+      fixedRotation: true,
+      shape: cylShape,
+    });
+    // boxBody.addShape(boxShape);
+    cylBody.position.x = -49;
+    cylBody.position.y = 300;
+    cylBody.position.z = 0;
+    // cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
+    // cylBody.position.y = 12;
+    // cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
+    this.world.addBody(cylBody);
+    this.userBodies[id] = cylBody;
+    return cylBody.id;
   }
   sphereUserControls(map) {
     const force = 50;
@@ -114,7 +157,7 @@ class Physics {
       );
       const body = new CANNON.Body({ mass: 1, material: this.wheelMaterial });
       const q = new CANNON.Quaternion();
-      q.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
+      // q.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
       body.addShape(shape, new CANNON.Vec3(), q);
       wheelBodies.push(body);
     });
@@ -159,23 +202,15 @@ class Physics {
       car.setSteeringValue(-maxSteerVal, 3);
     }
   }
+  navigateSphereAvatar(map) {
+    // const force = 450;
+    const force = 1;
+    const appliedForce = [0, 0, 0];
+    if (map.ArrowUp) appliedForce[2] = appliedForce[2] - force;
+    // if (map.ArrowRight) appliedForce[0] = appliedForce[0] + force;
+    if (map.ArrowDown) appliedForce[2] = appliedForce[2] + force;
+    // if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
+    return new CANNON.Vec3(...appliedForce);
+  }
 }
 module.exports = Physics;
-// const physics = new Physics();
-// console.log(physics.world);
-// const car = physics.createCar(0.7);
-// car.addToWorld(physics.world);
-// let wheels = physics.createWheelBodies(car);
-// console.log(wheels);
-//
-// const deltaPosition = 0.1;
-// const navigateThroughPosition = (map) => {
-//   const positionVector = [0, 0, 0];
-//   if (map.ArrowUp) {
-//     positionVector[2] = positionVector[2] - deltaPosition;
-//   }
-//   if (map.ArrowRight) positionVector[0] = positionVector[0] + deltaPosition;
-//   if (map.ArrowDown) positionVector[2] = positionVector[2] + deltaPosition;
-//   if (map.ArrowLeft) positionVector[0] = positionVector[0] - deltaPosition;
-//   return positionVector;
-// };
