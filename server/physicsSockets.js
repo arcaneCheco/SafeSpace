@@ -42,7 +42,8 @@ const updateConnectionGradients = (distanceToOtherUsers) => {
     } else {
       gradient = 1;
     }
-    connectionGradients[userId] = gradient;
+    let rtcId = activeUsers[userId].webRTCSocketid;
+    connectionGradients[rtcId] = gradient;
   }
   return connectionGradients;
 };
@@ -62,7 +63,7 @@ module.exports = (io) => {
       connectionGradients: {},
     };
     activeUsers[socket.id].bodyId = physics.createAndAddCylAvatar(socket.id);
-    console.log('physics users:', activeUsers)
+    // console.log("physics users:", activeUsers);
 
     // create Car
     // const chassisBody = physics.createCarChassis();
@@ -74,8 +75,14 @@ module.exports = (io) => {
     //     "#" + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6);
 
     socket.on("model loaded", () => {
+      // activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid;
       socket.emit("joined", socket.id, activeUsers);
-      io.to(socket.id).emit('userSpecificId', socket.id);
+      console.log(
+        `user with physicsid ${socket.id} and webRTC id ${
+          activeUsers[socket.id].webRTCSocketid
+        } just joined`
+      );
+      io.to(socket.id).emit("userSpecificId", socket.id);
       socket.broadcast.emit("add new user", socket.id, activeUsers[socket.id]);
     });
 
@@ -96,7 +103,8 @@ module.exports = (io) => {
 
     let carControl;
     socket.on("update", (map, controlModes) => {
-      activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid
+      if (activeUsers[socket.id].webRTCSocketid === undefined)
+        activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid;
 
       if (controlModes.carControl) {
         carControl = true;
@@ -133,6 +141,12 @@ module.exports = (io) => {
             distances[socket.id] = updateDistances(socket.id);
             activeUsers[socket.id].connectionGradients =
               updateConnectionGradients(distances[socket.id]);
+
+            activeUsers[socket.id].webRTCSocketid &&
+              socket.emit(
+                "new distances",
+                updateConnectionGradients(distances[socket.id])
+              );
           }
         }
       }
@@ -185,7 +199,7 @@ module.exports = (io) => {
         );
       }
       socket.emit("update", activeUsers);
-      activeUsers[socket.id] && io.to(socket.id).emit('userConnectionGradients', activeUsers[socket.id].connectionGradients);
+      // activeUsers[socket.id] && io.to(socket.id).emit('userConnectionGradients', activeUsers[socket.id].connectionGradients);
     }, 25);
   });
 };
