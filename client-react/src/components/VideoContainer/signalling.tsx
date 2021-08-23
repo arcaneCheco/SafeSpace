@@ -7,27 +7,50 @@ import { useEffect } from "react";
 import Video from "./video";
 import "./signalling.css";
 
-
-
 const Signalling: React.FC = () => {
-
   // Get active users from store
-  let activeUsers = {};
-  let userSpecificId = '';
   let userConnectionGradients = {};
-  useStore.subscribe(() => {
-    activeUsers = useStore.getState().activeUsers;
-    userSpecificId = useStore.getState().userSpecificId
-    userConnectionGradients = useStore.getState().userConnectionGradients
-    // console.log('user specific', activeUsers.userSpecificId)
-
-    console.log('users', userConnectionGradients)
-
-  });
+  const [connectedUsers, setConnectedUsers] = useState<any>([]);
+  let distances: any;
+  let conn: any = [];
+  // useStore.subscribe(
+  //   (prev, next: any) => {
+  //     distances = next;
+  //     let connState: any;
+  //     let webId;
+  //     if (distances) {
+  //       conn = [];
+  //       for ([webId, connState] of Object.entries(distances)) {
+  //         if (connState > 0) {
+  //           conn.push(webId);
+  //         }
+  //       }
+  //       if (conn.length !== connectedUsers.length) {
+  //         setConnectedUsers([...conn]);
+  //       }
+  //     }
+  //   },
+  //   (state) => state.distances
+  // );
+  // let scratch: any;
+  useStore.subscribe(
+    (prev: any, next) => {
+      setConnectedUsers(prev);
+      // scratch = prev;
+      // if (users) {
+      //   console.log(users);
+      //   // let active = users.map((user) => prev.indexOf(user.id) !== -1);
+      //   // console.log(active, "hewnwepnewfpoefhwepo");
+      // }
+    },
+    (state) => state.conn
+  );
+  // useEffect(() => {
+  //   console.log(scratch, "helllloooooo");
+  // }, [scratch]);
 
   const [socket, setSocket] = useState<any>();
   const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
-
 
   let localVideoRef = useRef<HTMLVideoElement>(null); // ref of the video on which you want to print your MediaStream
 
@@ -38,17 +61,17 @@ const Signalling: React.FC = () => {
   const pc_config = {
     iceServers: [
       // {
-        //   urls: 'stun:[STUN_IP]:[PORT]',
-        //   'credentials': '[YOR CREDENTIALS]',
-        //   'username': '[USERNAME]'
-        // },
-        {
-          urls: "stun:stun.l.google.com:19302",
-        },
-      ],
-    };
+      //   urls: 'stun:[STUN_IP]:[PORT]',
+      //   'credentials': '[YOR CREDENTIALS]',
+      //   'username': '[USERNAME]'
+      // },
+      {
+        urls: "stun:stun.l.google.com:19302",
+      },
+    ],
+  };
 
-    useEffect(() => {
+  useEffect(() => {
     let newSocket = io("http://localhost:3001/webRTCNamespace");
     let localStream: MediaStream;
 
@@ -181,6 +204,7 @@ const Signalling: React.FC = () => {
     try {
       console.log(`socketID(${id}) user entered`);
       let pc = createReceiverPeerConnection(id, newSocket);
+      console.log("wheeeeee", newSocket.id);
       createReceiverOffer(pc, newSocket, id);
     } catch (error) {
       console.log(error);
@@ -227,6 +251,7 @@ const Signalling: React.FC = () => {
       });
       console.log("create receiver offer success");
       await pc.setLocalDescription(new RTCSessionDescription(sdp));
+      console.log("wheyyyyyyy", newSocket.id);
 
       newSocket.emit("receiverOffer", {
         sdp,
@@ -330,20 +355,47 @@ const Signalling: React.FC = () => {
 
   // Insert opacity values into users array
 
-    const opacity = 0.5;
-    // let temp = activeUsers[userSpecificId].connectionGradients
-    // opacity={user.connectionGradients.userId}
+  const opacity = 0.9;
+  // let temp = activeUsers[userSpecificId].connectionGradients
+  // opacity={user.connectionGradients.userId}
 
-  console.log('signalling active users', activeUsers)
-
+  // useEffect(() => {
+  //   console.log("yoyoyoyoyyo");
+  //   let connState: any;
+  //   let webId;
+  //   if (distances) {
+  //     for ([webId, connState] of Object.entries(distances)) {
+  //       let whereInArray = conn.indexOf(webId);
+  //       console.log(whereInArray);
+  //       if (whereInArray !== -1) {
+  //         if (connState > 0) {
+  //         } else {
+  //           // console.log(conn, "beforesplice");
+  //           conn.splice(whereInArray, 1);
+  //           // console.log(conn, "aftersplice");
+  //         }
+  //       } else {
+  //         if (connState === 0) {
+  //           conn.push(webId);
+  //         }
+  //       }
+  //     }
+  //     if (conn.length !== connectedUsers.length) {
+  //       setConnectedUsers([...conn]);
+  //     }
+  //   }
+  // }, [distances]);
 
   // +++++++ VIDEO RENDERING +++++++ //
   return (
     <div className="Signalling">
       <div className="usersVideosBox">
-          {users.map((user, index) => {
-            return <Video key={index} stream={user.stream} opacity={opacity} userConnectionGradients={userConnectionGradients} />;
-          })}
+        {users.map((user, index) => {
+          if (user.id && connectedUsers.indexOf(user.id) !== -1) {
+            // if (true) {
+            return <Video key={index} stream={user.stream} opacity={opacity} />;
+          }
+        })}
       </div>
       <div className="userVideo">
         <div className="videoBox">

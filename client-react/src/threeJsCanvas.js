@@ -58,13 +58,26 @@ export default function threeJsCanvas() {
     }, 50);
   });
 
-  socket.on('userSpecificId', (userSpecificId) => useStore.setState({ userSpecificId: userSpecificId }));
+  socket.on("userSpecificId", (userSpecificId) =>
+    useStore.setState({ userSpecificId: userSpecificId })
+  );
 
   socket.on("add new user", (id, newUser) => visuals.addNewUser(id, newUser));
 
   socket.on("update", (activeUsers) => {
     visuals.updateUserStates(activeUsers);
-    useStore.setState({ activeUsers: activeUsers });
+    // useStore.setState({ activeUsers: activeUsers });
+  });
+  socket.on("new distances", (distances) => {
+    // useStore.setState({ distances });
+    let conn = [];
+    for (const [webId, connState] of Object.entries(distances)) {
+      if (webId && connState > 0) {
+        conn.push(webId);
+      }
+    }
+    let temp = useStore.getState().conn;
+    if (temp.length !== conn.length) useStore.setState({ conn });
   });
 
   socket.on("removeUser", (id) => visuals.removeUser(id));
