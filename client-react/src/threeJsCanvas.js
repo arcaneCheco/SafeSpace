@@ -20,7 +20,7 @@ export default function threeJsCanvas() {
     sphereUserControl: true,
     carControl: false,
   };
-  const gui = new GUI();
+  // const gui = new GUI();
   const helper = new THREE.GridHelper();
   visuals.scene.add(helper);
   const ambientLight = new THREE.AmbientLight();
@@ -43,6 +43,19 @@ export default function threeJsCanvas() {
     isLoaded = true;
     socket.emit("model loaded");
   });
+  const parameters = {
+    avatarColor: "#CAAD5F",
+  };
+  const gui = new GUI();
+  gui.addColor(parameters, "avatarColor").onChange(() => {
+    visuals.avatar.mesh.children[0].children[1].material.color.set(
+      parameters.avatarColor
+    );
+  });
+  // console.log(this.avatar.mesh.children[0].children[1]);
+  // visuals.avatar.mesh.children[0].children[1].material.color.set("#CAAD5F");
+  // this.avatar.mesh.children[0].children[1].material.color =
+  //   this.parameters.avatarColor;
 
   let goal;
   let temp = new THREE.Vector3();
@@ -56,23 +69,40 @@ export default function threeJsCanvas() {
     setInterval(() => {
       socket.emit("update", visuals.map, controlModes);
     }, 50);
+    useStore.setState({
+      activeUsers: activeUsers,
+    });
   });
 
-  socket.on('userSpecificId', (userSpecificId) => useStore.setState({ userSpecificId: userSpecificId }));
+  socket.on("userSpecificId", (userSpecificId) =>
+    useStore.setState({ userSpecificId: userSpecificId })
+  );
 
-  socket.on("add new user", (id, newUser) => visuals.addNewUser(id, newUser));
+  socket.on("add new user", (id, newUser, activeUsers) => {
+    useStore.setState({
+      activeUsers: activeUsers,
+    });
+    visuals.addNewUser(id, newUser);
+  });
 
   socket.on("update", (activeUsers) => {
     visuals.updateUserStates(activeUsers);
-    useStore.setState({ activeUsers: activeUsers });
+    // console.log(activeUsers);
+    if (activeUsers[visuals.userId]) {
+      // console.log(activeUsers[visuals.userId].connectionGradients);
+      useStore.setState({
+        userConnectionGradients:
+          activeUsers[visuals.userId].connectionGradients,
+      });
+    }
   });
 
   socket.on("removeUser", (id) => visuals.removeUser(id));
 
   /************ */
   let manualControl = false; // make this a click down event to enable orbit controls
-  document.onmousedown = () => (manualControl = true);
-  document.onmouseup = () => (manualControl = false);
+  // document.onmousedown = () => (manualControl = true);
+  // document.onmouseup = () => (manualControl = false);
 
   const clock = new THREE.Clock();
   let oldElapsedTime = 0;

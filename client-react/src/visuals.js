@@ -55,7 +55,6 @@ export default class Visuals {
       this.userMeshes[userId].position.copy(userData.position);
       this.scene.add(this.userMeshes[userId]);
     }
-    console.log(this.userMeshes);
   }
   removeUser(id) {
     this.scene.remove(this.scene.getObjectByName(this.userMeshes[id].name));
@@ -69,7 +68,7 @@ export default class Visuals {
       e.key === "ArrowLeft"
     )
       this.map[e.key] = e.type === "keydown";
-    console.log(this.map);
+    // console.log(this.map);
   }
   resize() {
     // Update sizes
@@ -117,6 +116,20 @@ export default class Visuals {
   }
   loadAvatar() {
     this.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
+      // var newMaterial = new THREE.MeshStandardMaterial({
+      //   color: 0xff0000,
+      // });
+      // gltf.scene.traverse((o) => {
+      //   if (o.isMesh) {
+      //     if (
+      //       o.name === "Skeleton_torso_joint_2" ||
+      //       o.name === "leg_joint_L_1" ||
+      //       o.name === "leg_joint_R_1"
+      //     ) {
+      //       o.material = newMaterial;
+      //     }
+      //   }
+      // });
       this.avatar.mesh = gltf.scene.children[0];
       this.avatar.mixer = new THREE.AnimationMixer(gltf.scene);
       this.avatar.action = this.avatar.mixer.clipAction(gltf.animations[0]);

@@ -7,27 +7,61 @@ import { useEffect } from "react";
 import Video from "./video";
 import "./signalling.css";
 
-
-
 const Signalling: React.FC = () => {
-
   // Get active users from store
   let activeUsers = {};
-  let userSpecificId = '';
-  let userConnectionGradients = {};
-  useStore.subscribe(() => {
-    activeUsers = useStore.getState().activeUsers;
-    userSpecificId = useStore.getState().userSpecificId
-    userConnectionGradients = useStore.getState().userConnectionGradients
-    // console.log('user specific', activeUsers.userSpecificId)
-
-    console.log('users', userConnectionGradients)
-
-  });
+  let userSpecificId = "";
+  // let [userConnectionGradients, setUserConnectionGradients] = useState({});
+  // useStore.subscribe(
+  //   () => {
+  //     setUserConnectionGradients(useStore.getState().userConnectionGradients);
+  //     // console.log(userConnectionGradients);
+  //   },
+  //   (state) => state.userConnectionGradients
+  // );
+  let [displayUsers, setDisplayUsers] = useState<any>([]);
+  let userConnectionGradients: any = null;
+  useStore.subscribe(
+    () => {
+      // console.log(useStore.getState().activeUsers);
+      activeUsers = useStore.getState().activeUsers;
+    },
+    (state) => state.activeUsers
+  );
+  setInterval(() => {
+    // console.log(users, "helllooo");
+    userConnectionGradients = useStore.getState().userConnectionGradients;
+    // console.log(userConnectionGradients);
+    // let connectedUsers: any = (userConnectionGradients);
+    let connectionStatus: any;
+    let webId: any;
+    let currentDisplayWebIds = displayUsers.map((user) => user.id);
+    // const webIds = users.map(user => user.id)
+    for ([webId, connectionStatus] of Object.entries(userConnectionGradients)) {
+      const otherUser = users.find((user) => user.id === webId);
+      if (otherUser) {
+        let whereInArray = currentDisplayWebIds.indexOf(otherUser.id);
+        console.log(whereInArray);
+        if (connectionStatus > 0) {
+          if (whereInArray === -1) {
+            console.log("hello");
+            setDisplayUsers((oldUsers) => [...oldUsers, otherUser]);
+            // console.log(displayUsers);
+          }
+        } else {
+          if (whereInArray !== -1) {
+            setDisplayUsers((oldUsers) =>
+              oldUsers.filter((user) => user.id !== webId)
+            );
+          }
+        }
+      }
+    }
+    // console.log(displayUsers);
+  }, 1500);
 
   const [socket, setSocket] = useState<any>();
   const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
-
 
   let localVideoRef = useRef<HTMLVideoElement>(null); // ref of the video on which you want to print your MediaStream
 
@@ -38,17 +72,17 @@ const Signalling: React.FC = () => {
   const pc_config = {
     iceServers: [
       // {
-        //   urls: 'stun:[STUN_IP]:[PORT]',
-        //   'credentials': '[YOR CREDENTIALS]',
-        //   'username': '[USERNAME]'
-        // },
-        {
-          urls: "stun:stun.l.google.com:19302",
-        },
-      ],
-    };
+      //   urls: 'stun:[STUN_IP]:[PORT]',
+      //   'credentials': '[YOR CREDENTIALS]',
+      //   'username': '[USERNAME]'
+      // },
+      {
+        urls: "stun:stun.l.google.com:19302",
+      },
+    ],
+  };
 
-    useEffect(() => {
+  useEffect(() => {
     let newSocket = io("http://localhost:3001/webRTCNamespace");
     let localStream: MediaStream;
 
@@ -79,8 +113,6 @@ const Signalling: React.FC = () => {
       "getSenderAnswer",
       async (data: { sdp: RTCSessionDescription }) => {
         try {
-          console.log("get sender answer");
-          console.log(data.sdp);
           await sendPC.setRemoteDescription(
             new RTCSessionDescription(data.sdp)
           );
@@ -95,10 +127,8 @@ const Signalling: React.FC = () => {
       "getSenderCandidate",
       async (data: { candidate: RTCIceCandidateInit }) => {
         try {
-          console.log("get sender candidate");
           if (!data.candidate) return;
           sendPC.addIceCandidate(new RTCIceCandidate(data.candidate));
-          console.log("candidate add success");
         } catch (error) {
           console.log(error);
         }
@@ -110,10 +140,8 @@ const Signalling: React.FC = () => {
       "getReceiverAnswer",
       async (data: { id: string; sdp: RTCSessionDescription }) => {
         try {
-          console.log(`get socketID(${data.id})'s answer`);
           let pc: RTCPeerConnection = receivePCs[data.id];
           await pc.setRemoteDescription(data.sdp);
-          console.log(`socketID(${data.id})'s set remote sdp success`);
         } catch (error) {
           console.log(error);
         }
@@ -125,12 +153,9 @@ const Signalling: React.FC = () => {
       "getReceiverCandidate",
       async (data: { id: string; candidate: RTCIceCandidateInit }) => {
         try {
-          console.log(data);
-          console.log(`get socketID(${data.id})'s candidate`);
           let pc: RTCPeerConnection = receivePCs[data.id];
           if (!data.candidate) return;
           pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-          console.log(`socketID(${data.id})'s candidate add success`);
         } catch (error) {
           console.log(error);
         }
@@ -197,7 +222,6 @@ const Signalling: React.FC = () => {
         offerToReceiveAudio: false,
         offerToReceiveVideo: false,
       });
-      console.log("create sender offer success");
       await sendPC.setLocalDescription(new RTCSessionDescription(sdp));
 
       newSocket.emit("senderOffer", {
@@ -225,7 +249,6 @@ const Signalling: React.FC = () => {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true,
       });
-      console.log("create receiver offer success");
       await pc.setLocalDescription(new RTCSessionDescription(sdp));
 
       newSocket.emit("receiverOffer", {
@@ -246,14 +269,11 @@ const Signalling: React.FC = () => {
     localStream: MediaStream
   ): RTCPeerConnection => {
     let pc = new RTCPeerConnection(pc_config);
-    // console.log(pc, 'pcccccc');
 
     // Your RTCIceCandidate information event occurred after you created the offer or answer signal.
     // Sends RTCIceCandidate information to the server via Socket
     pc.onicecandidate = (e) => {
-      console.log(e, "EVEMNTTTTT");
       if (e.candidate) {
-        console.log("sender PC onicecandidate");
         newSocket.emit("senderCandidate", {
           candidate: e.candidate,
           senderSocketID: newSocket.id,
@@ -262,12 +282,11 @@ const Signalling: React.FC = () => {
     };
 
     // Log when ICE connection status is changed
-    pc.oniceconnectionstatechange = (e) => {
-      console.log(e);
-    };
+    // pc.oniceconnectionstatechange = (e) => {
+    //   console.log(e);
+    // };
 
     if (localStream) {
-      console.log("localstream add");
       localStream.getTracks().forEach((track) => {
         pc.addTrack(track, localStream);
       });
@@ -295,25 +314,17 @@ const Signalling: React.FC = () => {
     // Send your RTCIceCandidate information to the server via Socket
     pc.onicecandidate = (e) => {
       if (e.candidate) {
-        console.log("receiver PC onicecandidate");
         newSocket.emit("receiverCandidate", {
           candidate: e.candidate,
           receiverSocketID: newSocket.id,
           senderSocketID: socketID,
         });
-        console.log(newSocket, "newwwwww socokeetttt");
       }
-    };
-
-    // Log when ICE connection status is changed
-    pc.oniceconnectionstatechange = (e) => {
-      console.log(e);
     };
 
     // Specifying other users' RTCSessionDescription as remoteSessionDescription in their RTCPeerConnection results in an event about the other user's track data.
     // register stream in users variable
     pc.ontrack = (e) => {
-      console.log("ontrack success");
       setUsers((oldUsers) => oldUsers.filter((user) => user.id !== socketID));
       setUsers((oldUsers) => [
         ...oldUsers,
@@ -330,20 +341,24 @@ const Signalling: React.FC = () => {
 
   // Insert opacity values into users array
 
-    const opacity = 0.5;
-    // let temp = activeUsers[userSpecificId].connectionGradients
-    // opacity={user.connectionGradients.userId}
-
-  console.log('signalling active users', activeUsers)
-
+  const opacity = 0.5;
+  // let temp = activeUsers[userSpecificId].connectionGradients
+  // opacity={user.connectionGradients.userId}
 
   // +++++++ VIDEO RENDERING +++++++ //
   return (
     <div className="Signalling">
       <div className="usersVideosBox">
-          {users.map((user, index) => {
-            return <Video key={index} stream={user.stream} opacity={opacity} userConnectionGradients={userConnectionGradients} />;
-          })}
+        {users.map((user, index) => {
+          return (
+            <Video
+              key={index}
+              stream={user.stream}
+              opacity={opacity}
+              userConnectionGradients={userConnectionGradients}
+            />
+          );
+        })}
       </div>
       <div className="userVideo">
         <div className="videoBox">

@@ -1,3 +1,4 @@
+const { default: waitUntil } = require("async-wait-until");
 const socketIO = require("socket.io");
 const wrtc = require("wrtc");
 const { WebRTCFuncs } = require("../webrtc");
@@ -15,14 +16,10 @@ const webRTC = new WebRTCFuncs();
 module.exports = (io) => {
   io.on("connection", (socket) => {
     socket.on("joinRoom", (data) => {
-
       webRTCUsers[socket.id] = {
         webRTCSocketId: socket.id,
       };
       socket.client.webRTCSocketid = socket.id;
-      console.log(socket.client.webRTCSocketid)
-
-      console.log("web RTCUsers ", webRTCUsers);
       try {
         let allUsers = webRTC.getOtherUsersInRoom(data.id, data.roomID);
         io.to(data.id).emit("allUsers", { users: allUsers });
@@ -58,8 +55,13 @@ module.exports = (io) => {
     // data.candidate - RTCICeCandidate of user
     socket.on("senderCandidate", (data) => {
       try {
-        let pc = webRTC.receiverPCs[data.senderSocketID];
-        pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
+        let pc;
+        waitUntil(() => webRTC.receiverPCs[data.senderSocketID]).then(() => {
+          pc = webRTC.receiverPCs[data.senderSocketID];
+          pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
+        });
+        // let pc = webRTC.receiverPCs[data.senderSocketID];
+        // pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
       } catch (error) {
         console.log(error);
       }
@@ -96,7 +98,6 @@ module.exports = (io) => {
         const senderPC = webRTC.senderPCs[data.senderSocketID].filter(
           (sPC) => sPC.id === data.receiverSocketID
         );
-        // console.log(senderPC, 'SENDERRRRRRR PCCCCCC')
         await senderPC[0].pc.addIceCandidate(
           new wrtc.RTCIceCandidate(data.candidate)
         );
