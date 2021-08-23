@@ -330,11 +330,11 @@ const Signalling: React.FC = () => {
 
   // Insert opacity values into users array
 
-    const opacity = 0.5;
+    const opacity = 1;
     // let temp = activeUsers[userSpecificId].connectionGradients
     // opacity={user.connectionGradients.userId}
 
-  console.log('signalling active users', activeUsers)
+  // console.log('signalling active users', activeUsers)
 
 
   // +++++++ VIDEO RENDERING +++++++ //
