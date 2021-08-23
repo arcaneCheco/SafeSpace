@@ -25,7 +25,7 @@ module.exports = (io) => {
       // Receive physics Socket id
       webRTCUsers[socket.id].physicsSocketid = socket.client.physicsSocketid
 
-      console.log("web RTCUsers ", webRTCUsers);
+      // console.log("web RTCUsers ", webRTCUsers);
 
       try {
         let allUsers = webRTC.getOtherUsersInRoom(data.id, data.roomID);
@@ -113,7 +113,7 @@ module.exports = (io) => {
     socket.on("disconnect", () => {
       if (webRTCUsers && webRTCUsers[socket.id]) {
         delete webRTCUsers[socket.id];
-        console.log("web RTCUsers ", webRTCUsers);
+        // console.log("web RTCUsers ", webRTCUsers);
 
       }
       try {

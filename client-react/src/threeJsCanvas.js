@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module";
-import useStore from "./store";
+import {useStore, useConStore} from "./store";
 import { io } from "socket.io-client";
 import Visuals from "./visuals";
 import { waitUntil } from "async-wait-until";
@@ -68,6 +68,10 @@ export default function threeJsCanvas() {
   socket.on("update", (activeUsers) => {
     visuals.updateUserStates(activeUsers);
     useStore.setState({ activeUsers: activeUsers });
+  });
+
+  socket.on("userConnectionGradients", (userConnectionGradients) => {
+    useConStore.setState({ userConnectionGradients: userConnectionGradients });
   });
 
   socket.on("removeUser", (id) => visuals.removeUser(id));

@@ -1,5 +1,5 @@
 import * as React from "react";
-import useStore from "../../store";
+import {useStore, useConStore}  from "../../store";
 import { useState } from "react";
 import io from "socket.io-client";
 import { useRef } from "react";
@@ -11,14 +11,14 @@ const Signalling: React.FC = () => {
   // Get active users from store
   let activeUsers = {};
   let userSpecificId = "";
-  let userConnectionGradients = {};
+  let userConnectionGradients: any = {};
   useStore.subscribe(() => {
     activeUsers = useStore.getState().activeUsers;
     userSpecificId = useStore.getState().userSpecificId;
-    userConnectionGradients = useStore.getState().userConnectionGradients;
+    // userConnectionGradients = useStore.getState().userConnectionGradients;
     // console.log('user specific', activeUsers)
     // console.log('userid', userSpecificId)
-    // console.log('users', userConnectionGradients)
+    // console.log('users', userSpecificId)
   });
 
   const [socket, setSocket] = useState<any>();
@@ -54,6 +54,12 @@ const Signalling: React.FC = () => {
       console.log("connection");
     });
 
+    newSocket.on("userEnter", (data: { id: string }) => {
+      createReceivePC(data.id, newSocket);
+      setUsers((users) => users.filter((user) => user.id !== data.id));
+      console.log('user Entered: ', users)
+    });
+
     // Generates RTCPeerConnection to receive MediaStream then sent to server (needs to be in userJoined in client.js)
     newSocket.on("userEnter", (data: { id: string }) => {
       createReceivePC(data.id, newSocket);
@@ -79,8 +85,8 @@ const Signalling: React.FC = () => {
       "getSenderAnswer",
       async (data: { sdp: RTCSessionDescription }) => {
         try {
-          console.log("get sender answer");
-          console.log(data.sdp);
+          // console.log("get sender answer");
+          // console.log(data.sdp);
           await sendPC.setRemoteDescription(
             new RTCSessionDescription(data.sdp)
           );
@@ -95,10 +101,10 @@ const Signalling: React.FC = () => {
       "getSenderCandidate",
       async (data: { candidate: RTCIceCandidateInit }) => {
         try {
-          console.log("get sender candidate");
+          // console.log("get sender candidate");
           if (!data.candidate) return;
           sendPC.addIceCandidate(new RTCIceCandidate(data.candidate));
-          console.log("candidate add success");
+          // console.log("candidate add success");
         } catch (error) {
           console.log(error);
         }
@@ -110,10 +116,10 @@ const Signalling: React.FC = () => {
       "getReceiverAnswer",
       async (data: { id: string; sdp: RTCSessionDescription }) => {
         try {
-          console.log(`get socketID(${data.id})'s answer`);
+          // console.log(`get socketID(${data.id})'s answer`);
           let pc: RTCPeerConnection = receivePCs[data.id];
           await pc.setRemoteDescription(data.sdp);
-          console.log(`socketID(${data.id})'s set remote sdp success`);
+          // console.log(`socketID(${data.id})'s set remote sdp success`);
         } catch (error) {
           console.log(error);
         }
@@ -125,12 +131,12 @@ const Signalling: React.FC = () => {
       "getReceiverCandidate",
       async (data: { id: string; candidate: RTCIceCandidateInit }) => {
         try {
-          console.log(data);
-          console.log(`get socketID(${data.id})'s candidate`);
+          // console.log(data);
+          // console.log(`get socketID(${data.id})'s candidate`);
           let pc: RTCPeerConnection = receivePCs[data.id];
           if (!data.candidate) return;
           pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-          console.log(`socketID(${data.id})'s candidate add success`);
+          // console.log(`socketID(${data.id})'s candidate add success`);
         } catch (error) {
           console.log(error);
         }
@@ -179,7 +185,7 @@ const Signalling: React.FC = () => {
 
   const createReceivePC = (id: string, newSocket: any) => {
     try {
-      console.log(`socketID(${id}) user entered`);
+      // console.log(`socketID(${id}) user entered`);
       let pc = createReceiverPeerConnection(id, newSocket);
       createReceiverOffer(pc, newSocket, id);
     } catch (error) {
@@ -295,13 +301,13 @@ const Signalling: React.FC = () => {
     // Send your RTCIceCandidate information to the server via Socket
     pc.onicecandidate = (e) => {
       if (e.candidate) {
-        console.log("receiver PC onicecandidate");
+        // console.log("receiver PC onicecandidate");
         newSocket.emit("receiverCandidate", {
           candidate: e.candidate,
           receiverSocketID: newSocket.id,
           senderSocketID: socketID,
         });
-        console.log(newSocket, "newwwwww socokeetttt");
+        // console.log(newSocket, "newwwwww socokeetttt");
       }
     };
 
@@ -313,7 +319,7 @@ const Signalling: React.FC = () => {
     // Specifying other users' RTCSessionDescription as remoteSessionDescription in their RTCPeerConnection results in an event about the other user's track data.
     // register stream in users variable
     pc.ontrack = (e) => {
-      console.log("ontrack success");
+      // console.log("ontrack success");
       setUsers((oldUsers) => oldUsers.filter((user) => user.id !== socketID));
       setUsers((oldUsers) => [
         ...oldUsers,
@@ -330,7 +336,25 @@ const Signalling: React.FC = () => {
 
   // Insert opacity values into users array
 
-  const opacity = 1;
+  useConStore.subscribe(() => {
+    userConnectionGradients = useStore.getState().userConnectionGradients;
+    console.log('userConnectionGradients', userConnectionGradients)
+  });
+
+  const [connectionstate, setConnectionStates] = useState<any>({})
+
+
+
+  useEffect(() => {
+    setInterval(() => {
+      setConnectionStates(userConnectionGradients)
+    }, 1000);
+
+  }, [userConnectionGradients]);
+
+
+  let opacity = 1;
+
   // let temp = activeUsers[userSpecificId].connectionGradients
   // opacity={user.connectionGradients.userId}
 
@@ -340,11 +364,13 @@ const Signalling: React.FC = () => {
   return (
     <div className="Signalling">
       <div className="usersVideosBox">
-        {users.map((user, index) => {
+      {users.map((user, index) => {
           {
-            console.log("video here", user);
-          }
+            console.log("video here",user.id);
+            console.log("video here",userConnectionGradients);
 
+          }
+          if (connectionstate[user.id] > 0) {
           return (
             <Video
               key={index}
@@ -353,7 +379,7 @@ const Signalling: React.FC = () => {
               userConnectionGradients={userConnectionGradients}
             />
           );
-        })}
+        }})}
       </div>
       <div className="userVideo">
         <div className="videoBox">

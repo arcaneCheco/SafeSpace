@@ -1,5 +1,6 @@
 const CANNON = require("cannon-es");
 const Physics = require("./physics");
+const { waitUntil } = require("async-wait-until");
 let activeUsers = {};
 let userCount = 0;
 
@@ -29,20 +30,45 @@ const sortedListOfUsers = (distanceToOtherUsers) => {
 };
 const radiusConnected = 2 * 7.5;
 const radiusDisconnected = 2 * 15;
-const updateConnectionGradients = (distanceToOtherUsers) => {
+const updateConnectionGradients = (distanceToOtherUsers, RTCid, socket, io) => {
   const connectionGradients = {};
-  for (const [userId, distance] of Object.entries(distanceToOtherUsers)) {
-    let gradient = 0;
-    if (distance > radiusDisconnected) {
-      gradient = 0;
-    } else if (distance > radiusConnected) {
-      gradient =
-        1 -
-        (distance - radiusConnected) / (radiusDisconnected - radiusConnected);
-    } else {
-      gradient = 1;
+  let id = ''
+  if (socket.id) id = socket.id;
+  if (id) {
+
+    for (const [userId, distance] of Object.entries(distanceToOtherUsers)) {
+      let gradient = 0;
+      if (distance > radiusDisconnected) {
+        gradient = 0;
+        activeUsers[id] &&
+          io
+            .to(socket.id)
+            .emit(
+              "userConnectionGradients",
+              activeUsers[id].connectionGradients
+            );
+        console.log('(distance > radiusDisconnected && gradient !== 0) ', activeUsers);
+
+        // } else if (distance > radiusConnected) {
+        //   gradient =
+        //     1 -
+        //     (distance - radiusConnected) / (radiusDisconnected - radiusConnected);
+      } else if (distance < radiusDisconnected && gradient !== 1) {
+        gradient = 1;
+        activeUsers[id] &&
+          io
+            .to(socket.id)
+            .emit(
+              "userConnectionGradients",
+              activeUsers[id].connectionGradients
+            );
+        console.log('(distance < radiusDisconnected && gradient !== 1) ', activeUsers);
+      }
+
+      if (RTCid) {
+        connectionGradients[RTCid] = gradient;
+      }
     }
-    connectionGradients[userId] = gradient;
   }
   return connectionGradients;
 };
@@ -61,11 +87,17 @@ module.exports = (io) => {
       quaternion: { x: 0, y: 0, z: 0, w: 0 },
       connectionGradients: {},
     };
-    activeUsers[socket.id].bodyId = physics.createAndAddCylAvatar(socket.id);
-    // console.log('physics users:', activeUsers)
 
-    // Share physics Socket across to physics namespace
-    socket.client.physicsSocketid = socket.id;
+    let webRTCID = "";
+    waitUntil(() => socket.client.webRTCSocketid !== undefined).then(() => {
+      webRTCID = socket.client.webRTCSocketid;
+      activeUsers[socket.id].webRTCSocketid = webRTCID;
+    });
+    activeUsers[socket.id].bodyId = physics.createAndAddCylAvatar(socket.id);
+    // waitUntil(() => socket.client.webRTCSocketid !== undefined).then(() => {
+    //   activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid;
+    // });
+    // console.log("HELLLLOOOO", socket.client.webRTCSocketid);
 
     // create Car
     // const chassisBody = physics.createCarChassis();
@@ -77,9 +109,18 @@ module.exports = (io) => {
     //     "#" + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6);
 
     socket.on("model loaded", () => {
+      // waitUntil(() => socket.client.webRTCSocketid !== undefined).then(() => {
+      activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid;
       socket.emit("joined", socket.id, activeUsers);
-      io.to(socket.id).emit('userSpecificId', socket.id);
-      socket.broadcast.emit("add new user", socket.id, activeUsers[socket.id]);
+      console.log(`user with physics id ${socket.id} just joined`);
+      io.to(socket.id).emit("userSpecificId", socket.id);
+      socket.broadcast.emit(
+        "add new user",
+        socket.id,
+        activeUsers[socket.id],
+        activeUsers
+      );
+      // });
     });
 
     socket.on("disconnect", () => {
@@ -99,8 +140,6 @@ module.exports = (io) => {
 
     let carControl;
     socket.on("update", (map, controlModes) => {
-      activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid
-
       if (controlModes.carControl) {
         carControl = true;
         physics.carNavigation(car, map);
@@ -135,7 +174,7 @@ module.exports = (io) => {
             physics.userBodies[socket.id].wakeUp();
             distances[socket.id] = updateDistances(socket.id);
             activeUsers[socket.id].connectionGradients =
-              updateConnectionGradients(distances[socket.id]);
+              updateConnectionGradients(distances[socket.id], webRTCID, socket, io);
           }
         }
       }
@@ -188,7 +227,6 @@ module.exports = (io) => {
         );
       }
       socket.emit("update", activeUsers);
-      activeUsers[socket.id] && io.to(socket.id).emit('userConnectionGradients', activeUsers[socket.id].connectionGradients);
     }, 25);
   });
 };

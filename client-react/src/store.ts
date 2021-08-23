@@ -6,9 +6,17 @@ type store = {
   userConnectionGradients: any;
 };
 
+type conStore = {
+  userConnectionGradients: any;
+};
+
 const useStore = create<store>((set) => ({
   activeUsers: {},
   userSpecificId: '',
+  userConnectionGradients: {}
+}));
+
+const useConStore = create<conStore>((set) => ({
   userConnectionGradients: {}
 }));
 
@@ -16,4 +24,4 @@ const useStore = create<store>((set) => ({
 //   console.log('new state', useStore.getState());
 // })
 
-export default useStore;
+export {useStore, useConStore};
