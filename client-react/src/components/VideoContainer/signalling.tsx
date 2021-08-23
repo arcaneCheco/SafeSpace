@@ -16,8 +16,8 @@ const Signalling: React.FC = () => {
     activeUsers = useStore.getState().activeUsers;
     userSpecificId = useStore.getState().userSpecificId;
     userConnectionGradients = useStore.getState().userConnectionGradients;
-    // console.log('user specific', activeUsers.userSpecificId)
-
+    // console.log('user specific', activeUsers)
+    // console.log('userid', userSpecificId)
     // console.log('users', userConnectionGradients)
   });
 
@@ -343,7 +343,6 @@ const Signalling: React.FC = () => {
         {users.map((user, index) => {
           {
             console.log("video here", user);
-            console.log("userConnectionGradients ", userConnectionGradients);
           }
 
           return (
