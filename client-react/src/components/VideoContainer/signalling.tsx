@@ -322,7 +322,7 @@ const Signalling: React.FC = () => {
 
   // Insert opacity values into users array
 
-  const opacity = 0.9;
+  const opacity = 1;
 
   // +++++++ VIDEO RENDERING +++++++ //
   return (

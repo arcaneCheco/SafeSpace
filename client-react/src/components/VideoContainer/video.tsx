@@ -16,8 +16,7 @@ const Video = ({ stream, opacity }: Props) => {
 
   useEffect(() => {
     if (ref.current) ref.current.srcObject = stream;
-    // if (muted) setIsMuted(muted);
-  }, []);
+  }, [])
 
   return (
     <div className="videoSingle">

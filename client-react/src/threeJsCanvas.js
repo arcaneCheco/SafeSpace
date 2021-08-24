@@ -4,7 +4,6 @@ import useStore from "./store";
 import { io } from "socket.io-client";
 import Visuals from "./visuals";
 import { waitUntil } from "async-wait-until";
-import "./models/3D-landscape/NatureGradientPack1.glb";
 
 export default function threeJsCanvas() {
   /**
@@ -28,28 +27,6 @@ export default function threeJsCanvas() {
   visuals.scene.add(ambientLight);
 
   /**
-   * load landscape
-   */
-
-  // const landscape = () => {
-  //   visuals.gltfLoader.load("/models/3D-landscape/NatureGradientPack1.glb", (gltf) => {
-  //     console.log(gltf, 'gltfff');
-  //     const dimensions = new THREE.Box3().setFromObject(gltf.scene);
-  //     // console.log('dimensions:', dimensions.max.x - dimensions.min.x, dimensions.max.y - dimensions.min.y, dimensions.max.z - dimensions.min.z)
-  //     gltf.scene.scale.set(24, 24, 24)
-  //     visuals.scene.add(gltf.scene);
-  //   },
-  //     function (xhr) {
-  //       console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-  //     },
-  //     function (error) {
-  //       console.log('An error happened');
-  //     }
-  //   );
-  // }
-  // landscape();
-
-  /**
    * establish socket connection
    */
   const socket = io("http://localhost:3003/physicsNamespace");
@@ -67,18 +44,13 @@ export default function threeJsCanvas() {
     socket.emit("model loaded");
   });
 
-  let goal;
-  let temp = new THREE.Vector3();
-  /***camera, inside joined if (userId === myId) block */
-  // goal = new THREE.Object3D();
-  // visuals.userMeshes[myId].add(goal);
-  // goal.position.set(1, 10, 2);
-  /*** */
+  let hasJoined = false;
   socket.on("joined", (id, activeUsers) => {
     visuals.joiningUser(id, activeUsers);
-    setInterval(() => {
-      socket.emit("update", visuals.map, controlModes);
-    }, 50);
+    hasJoined = true;
+    // setInterval(() => {
+    //   socket.emit("update", visuals.map, controlModes);
+    // }, 50);
   });
 
   socket.on("userSpecificId", (userSpecificId) =>
@@ -115,18 +87,17 @@ export default function threeJsCanvas() {
     const deltaTime = elapsedTime - oldElapsedTime;
     oldElapsedTime = elapsedTime;
 
+    //
+    hasJoined && socket.emit("update", visuals.map, controlModes, deltaTime);
+    //
+
     // Update controls
     visuals.orbitControls.update();
 
     // update camera
-    if (
-      visuals.userId &&
-      visuals.userMeshes[visuals.userId] &&
-      !manualControl
-    ) {
-      visuals.updateAvatarModeCamera(visuals.userMeshes[visuals.userId]);
-    }
-    //update animaations
+    visuals.updateThirdPersonViewPerspective();
+
+    // udpate animation
     if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
       visuals.avatar.mixer.update(deltaTime);
     }
@@ -138,9 +109,14 @@ export default function threeJsCanvas() {
     // console.log(users)
 
     // Call tick again on the next frame
-    window.requestAnimationFrame(tick);
+    // window.requestAnimationFrame(tick);
   };
-  tick();
+
+  // tick();
+
+  setInterval(() => {
+    tick();
+  }, 50);
 }
 
 // // car

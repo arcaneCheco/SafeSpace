@@ -36,13 +36,41 @@ export default class Visuals {
     this.loadAvatar();
     this.loadLandscape();
     this.scene.add(this.camera);
-    // third person view init
-    // this.goal = new THREE.Object3D();
-    // this.userMeshes[this.userId].add(this.goal);
-    // this.goal.position.set(1, 10, 2);
+    this.cameraIsInitialized = false;
     ////////////
     window.addEventListener("resize", () => this.resize());
     document.onkeydown = document.onkeyup = (e) => this.keyboardControls(e);
+  }
+  // updateThirdPersonViewPerspective()
+  initializeCamera() {
+    this.goal = new THREE.Object3D();
+    // this.goal.add(this.userMeshes[this.userId]);
+    this.userMeshes[this.userId].add(this.goal);
+    this.goal.position.set(0.5, 6, 3);
+    this.temp = new THREE.Vector3();
+  }
+  updateThirdPersonViewPerspective() {
+    if (!this.carmeraIsInitialized) {
+      if (this.userMeshes[this.userId]) {
+        this.initializeCamera();
+        this.carmeraIsInitialized = true;
+      } else {
+        return;
+      }
+    } else {
+      this.temp.setFromMatrixPosition(this.goal.matrixWorld);
+      this.camera.position.lerp(this.temp, 0.2);
+      this.camera.lookAt(this.userMeshes[this.userId].position);
+    }
+  }
+  updateAvatarModeCamera(target) {
+    let offset = new THREE.Vector3(
+      target.position.x + 2,
+      target.position.y + 20,
+      target.position.z + 20
+    );
+    this.camera.position.copy(offset);
+    this.camera.lookAt(target.position);
   }
   joiningUser(id, activeUsers) {
     this.userId = id;
@@ -90,25 +118,8 @@ export default class Visuals {
         this.userMeshes[userId].quaternion.copy(userData.quaternion);
       }
     }
+  }
 
-    // updateThirdPersonViewPerspective()
-  }
-  // updateThirdPersonViewPerspective() {
-  //   if (this.userMeshes[this.userId]) {
-  //     this.temp.setFromMatrixPosition(this.goal.matrixWorld);
-  //     this.camera.position.lerp(this.temp, 0.2);
-  //     this.camera.lookAt(this.userMeshes[this.userId].position);
-  //   }
-  // }
-  updateAvatarModeCamera(target) {
-    let offset = new THREE.Vector3(
-      target.position.x + 2,
-      target.position.y + 20,
-      target.position.z + 20
-    );
-    this.camera.position.copy(offset);
-    this.camera.lookAt(target.position);
-  }
   addNewUser(id, userData) {
     const newMesh = SkeletonUtils.clone(this.avatar.mesh);
     this.userMeshes[id] = SkeletonUtils.clone(this.avatar.mesh);
@@ -130,14 +141,8 @@ export default class Visuals {
   loadLandscape() {
     this.gltfLoader.load("/models/3D-landscape/NatureGradientPack1.glb", (gltf) => {
       console.log(gltf, 'gltfff');
-      // const dimensions = new THREE.Box3().setFromObject(gltf.scene);
-      // console.log(gltf.scene.children[6].scale)
-      gltf.scene.scale.set(5, 5, 5)
-      // gltf.scene.children[6].scale.set(24 * helper.x, 24 * helper.y, 24 * helper.z)
-      //const scratch = gltf.scene.children[6]
-      // console.log('dimensions:', dimensions.max.x - dimensions.min.x, dimensions.max.y - dimensions.min.y, dimensions.max.z - dimensions.min.z)
+      gltf.scene.scale.set(10, 10, 10)
       gltf.scene.children[6].position.y += 0.1;
-      //this.scene.add(scratch);
       this.scene.add(gltf.scene);
     },
       function (xhr) {
