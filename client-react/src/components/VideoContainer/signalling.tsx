@@ -7,27 +7,17 @@ import { useEffect } from "react";
 import Video from "./video";
 import "./signalling.css";
 
-
-
 const Signalling: React.FC = () => {
-
-  // Get active users from store
-  let activeUsers = {};
-  let userSpecificId = '';
-  let userConnectionGradients = {};
-  useStore.subscribe(() => {
-    activeUsers = useStore.getState().activeUsers;
-    userSpecificId = useStore.getState().userSpecificId
-    userConnectionGradients = useStore.getState().userConnectionGradients
-    // console.log('user specific', activeUsers.userSpecificId)
-
-    console.log('users', userConnectionGradients)
-
-  });
+  const [connectedUsers, setConnectedUsers] = useState<any>([]);
+  useStore.subscribe(
+    (prev: any, next) => {
+      setConnectedUsers(prev);
+    },
+    (state) => state.conn
+  );
 
   const [socket, setSocket] = useState<any>();
   const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
-
 
   let localVideoRef = useRef<HTMLVideoElement>(null); // ref of the video on which you want to print your MediaStream
 
@@ -38,17 +28,17 @@ const Signalling: React.FC = () => {
   const pc_config = {
     iceServers: [
       // {
-        //   urls: 'stun:[STUN_IP]:[PORT]',
-        //   'credentials': '[YOR CREDENTIALS]',
-        //   'username': '[USERNAME]'
-        // },
-        {
-          urls: "stun:stun.l.google.com:19302",
-        },
-      ],
-    };
+      //   urls: 'stun:[STUN_IP]:[PORT]',
+      //   'credentials': '[YOR CREDENTIALS]',
+      //   'username': '[USERNAME]'
+      // },
+      {
+        urls: "stun:stun.l.google.com:19302",
+      },
+    ],
+  };
 
-    useEffect(() => {
+  useEffect(() => {
     let newSocket = io("http://localhost:3001/webRTCNamespace");
     let localStream: MediaStream;
 
@@ -181,6 +171,7 @@ const Signalling: React.FC = () => {
     try {
       console.log(`socketID(${id}) user entered`);
       let pc = createReceiverPeerConnection(id, newSocket);
+      console.log("wheeeeee", newSocket.id);
       createReceiverOffer(pc, newSocket, id);
     } catch (error) {
       console.log(error);
@@ -227,6 +218,7 @@ const Signalling: React.FC = () => {
       });
       console.log("create receiver offer success");
       await pc.setLocalDescription(new RTCSessionDescription(sdp));
+      console.log("wheyyyyyyy", newSocket.id);
 
       newSocket.emit("receiverOffer", {
         sdp,
@@ -331,27 +323,24 @@ const Signalling: React.FC = () => {
   // Insert opacity values into users array
 
     const opacity = 1;
-    // let temp = activeUsers[userSpecificId].connectionGradients
-    // opacity={user.connectionGradients.userId}
-
-  // console.log('signalling active users', activeUsers)
-
 
   // +++++++ VIDEO RENDERING +++++++ //
   return (
     <div className="Signalling">
       <div className="usersVideosBox">
-          {users.map((user, index) => {
-            return <Video key={index} stream={user.stream} opacity={opacity} userConnectionGradients={userConnectionGradients} />;
-          })}
+        {users.map((user, index) => {
+          if (user.id && connectedUsers.indexOf(user.id) !== -1) {
+            return <Video key={index} stream={user.stream} opacity={opacity} />;
+          }
+        })}
       </div>
       <div className="userVideo">
         <div className="videoBox">
           <video
             className="videoTile"
-            muted
             ref={localVideoRef}
             autoPlay
+            muted={true}
           ></video>
         </div>
       </div>

@@ -42,7 +42,8 @@ const updateConnectionGradients = (distanceToOtherUsers) => {
     } else {
       gradient = 1;
     }
-    connectionGradients[userId] = gradient;
+    let rtcId = activeUsers[userId].webRTCSocketid;
+    connectionGradients[rtcId] = gradient;
   }
   return connectionGradients;
 };
@@ -62,7 +63,7 @@ module.exports = (io) => {
       connectionGradients: {},
     };
     activeUsers[socket.id].bodyId = physics.createAndAddCylAvatar(socket.id);
-    console.log('physics users:', activeUsers)
+    // console.log("physics users:", activeUsers);
 
     // create Car
     // const chassisBody = physics.createCarChassis();
@@ -74,8 +75,14 @@ module.exports = (io) => {
     //     "#" + (Math.random() * 0xfffff * 1000000).toString(16).slice(0, 6);
 
     socket.on("model loaded", () => {
+      // activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid;
       socket.emit("joined", socket.id, activeUsers);
-      io.to(socket.id).emit('userSpecificId', socket.id);
+      console.log(
+        `user with physicsid ${socket.id} and webRTC id ${
+          activeUsers[socket.id].webRTCSocketid
+        } just joined`
+      );
+      io.to(socket.id).emit("userSpecificId", socket.id);
       socket.broadcast.emit("add new user", socket.id, activeUsers[socket.id]);
     });
 
@@ -95,8 +102,43 @@ module.exports = (io) => {
     });
 
     let carControl;
-    socket.on("update", (map, controlModes) => {
-      activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid
+    socket.on("update", (map, controlModes, deltaTime) => {
+      ///////////
+      physics.world.step(deltaTime);
+      Object.keys(activeUsers).forEach((user) => {
+        activeUsers[user].position = {
+          x: physics.userBodies[user].position.x,
+          y: physics.userBodies[user].position.y - 1.5080219133341668 * 4 * 0.5,
+          z: physics.userBodies[user].position.z,
+        };
+        // -90deg rotation about x and 180 deg roation about z
+        activeUsers[user].quaternion = physics.userBodies[user].quaternion.mult(
+          {
+            x: 0.14630178721112524,
+            y: -0.6918061773783395,
+            z: -0.6918061773783396,
+            w: -0.14630178721112522,
+          }
+        );
+      });
+      if (carControl) {
+        physics.updateCarWheels(car, wheelBodies);
+        socket.emit(
+          "update wheels",
+          wheelBodies.map((wheel) => ({
+            position: wheel.position,
+            quaternion: wheel.quaternion,
+          })),
+          {
+            position: chassisBody.position,
+            quaternion: chassisBody.quaternion,
+          }
+        );
+      }
+      socket.emit("update", activeUsers);
+      ///////////
+      if (activeUsers[socket.id].webRTCSocketid === undefined)
+        activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid;
 
       if (controlModes.carControl) {
         carControl = true;
@@ -133,59 +175,64 @@ module.exports = (io) => {
             distances[socket.id] = updateDistances(socket.id);
             activeUsers[socket.id].connectionGradients =
               updateConnectionGradients(distances[socket.id]);
+
+            activeUsers[socket.id].webRTCSocketid &&
+              socket.emit(
+                "new distances",
+                updateConnectionGradients(distances[socket.id])
+              );
           }
         }
       }
     });
 
-    // // send sorted list of usernames to client
     // setInterval(() => {
-    //   if (distances[socket.id]) {
+    //   physics.world.step(delta);
+    //   Object.keys(activeUsers).forEach((user) => {
+    //     activeUsers[user].position = {
+    //       x: physics.userBodies[user].position.x,
+    //       y: physics.userBodies[user].position.y - 1.5080219133341668 * 4 * 0.5,
+    //       z: physics.userBodies[user].position.z,
+    //     };
+    //     // -90deg rotation about x and 180 deg roation about z
+    //     activeUsers[user].quaternion = physics.userBodies[user].quaternion.mult(
+    //       {
+    //         x: 0.14630178721112524,
+    //         y: -0.6918061773783395,
+    //         z: -0.6918061773783396,
+    //         w: -0.14630178721112522,
+    //       }
+    //     );
+    //   });
+    //   if (carControl) {
+    //     physics.updateCarWheels(car, wheelBodies);
     //     socket.emit(
-    //       "active users ordered",
-    //       sortedListOfUsers(distances[socket.id]).map((userId) => {
-    //         if (activeUsers[userId]) {
-    //           return activeUsers[userId].username;
-    //         }
-    //       })
+    //       "update wheels",
+    //       wheelBodies.map((wheel) => ({
+    //         position: wheel.position,
+    //         quaternion: wheel.quaternion,
+    //       })),
+    //       {
+    //         position: chassisBody.position,
+    //         quaternion: chassisBody.quaternion,
+    //       }
     //     );
     //   }
-    // }, 1000);
-
-    setInterval(() => {
-      physics.world.step(0.025);
-      Object.keys(activeUsers).forEach((user) => {
-        activeUsers[user].position = {
-          x: physics.userBodies[user].position.x,
-          y: physics.userBodies[user].position.y - 1.5080219133341668 * 4 * 0.5,
-          z: physics.userBodies[user].position.z,
-        };
-        // -90deg rotation about x and 180 deg roation about z
-        activeUsers[user].quaternion = physics.userBodies[user].quaternion.mult(
-          {
-            x: 0.14630178721112524,
-            y: -0.6918061773783395,
-            z: -0.6918061773783396,
-            w: -0.14630178721112522,
-          }
-        );
-      });
-      if (carControl) {
-        physics.updateCarWheels(car, wheelBodies);
-        socket.emit(
-          "update wheels",
-          wheelBodies.map((wheel) => ({
-            position: wheel.position,
-            quaternion: wheel.quaternion,
-          })),
-          {
-            position: chassisBody.position,
-            quaternion: chassisBody.quaternion,
-          }
-        );
-      }
-      socket.emit("update", activeUsers);
-      activeUsers[socket.id] && io.to(socket.id).emit('userConnectionGradients', activeUsers[socket.id].connectionGradients);
-    }, 25);
+    //   socket.emit("update", activeUsers);
+    // }, delta * 1000);
   });
 };
+
+// // send sorted list of usernames to client
+// setInterval(() => {
+//   if (distances[socket.id]) {
+//     socket.emit(
+//       "active users ordered",
+//       sortedListOfUsers(distances[socket.id]).map((userId) => {
+//         if (activeUsers[userId]) {
+//           return activeUsers[userId].username;
+//         }
+//       })
+//     );
+//   }
+// }, 1000);
