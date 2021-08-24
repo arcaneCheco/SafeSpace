@@ -66,10 +66,8 @@ export default function threeJsCanvas() {
 
   socket.on("update", (activeUsers) => {
     visuals.updateUserStates(activeUsers);
-    // useStore.setState({ activeUsers: activeUsers });
   });
   socket.on("new distances", (distances) => {
-    // useStore.setState({ distances });
     let conn = [];
     for (const [webId, connState] of Object.entries(distances)) {
       if (webId && connState > 0) {
