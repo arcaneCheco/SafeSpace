@@ -73,13 +73,9 @@ class Physics {
       fixedRotation: true,
       shape: cylShape,
     });
-    // boxBody.addShape(boxShape);
-    cylBody.position.x = -49;
-    cylBody.position.y = 300;
-    cylBody.position.z = 0;
-    // cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
-    // cylBody.position.y = 12;
-    // cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
+    cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 10;
+    cylBody.position.y = 12;
+    cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 10;
     this.world.addBody(cylBody);
     this.userBodies[id] = cylBody;
     return cylBody.id;

@@ -45,18 +45,13 @@ export default function threeJsCanvas() {
     socket.emit("model loaded");
   });
 
-  let goal;
-  let temp = new THREE.Vector3();
-  /***camera, inside joined if (userId === myId) block */
-  // goal = new THREE.Object3D();
-  // visuals.userMeshes[myId].add(goal);
-  // goal.position.set(1, 10, 2);
-  /*** */
+  let hasJoined = false;
   socket.on("joined", (id, activeUsers) => {
     visuals.joiningUser(id, activeUsers);
-    setInterval(() => {
-      socket.emit("update", visuals.map, controlModes);
-    }, 50);
+    hasJoined = true;
+    // setInterval(() => {
+    //   socket.emit("update", visuals.map, controlModes);
+    // }, 50);
   });
 
   socket.on("userSpecificId", (userSpecificId) =>
@@ -69,7 +64,6 @@ export default function threeJsCanvas() {
     visuals.updateUserStates(activeUsers);
   });
   socket.on("new distances", (distances) => {
-    // useStore.setState({ distances });
     let conn = [];
     for (const [webId, connState] of Object.entries(distances)) {
       if (webId && connState > 0) {
@@ -94,18 +88,17 @@ export default function threeJsCanvas() {
     const deltaTime = elapsedTime - oldElapsedTime;
     oldElapsedTime = elapsedTime;
 
+    //
+    hasJoined && socket.emit("update", visuals.map, controlModes, deltaTime);
+    //
+
     // Update controls
     visuals.orbitControls.update();
 
     // update camera
-    if (
-      visuals.userId &&
-      visuals.userMeshes[visuals.userId] &&
-      !manualControl
-    ) {
-      visuals.updateAvatarModeCamera(visuals.userMeshes[visuals.userId]);
-    }
-    //update animaations
+    visuals.updateThirdPersonViewPerspective();
+
+    // udpate animation
     if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
       visuals.avatar.mixer.update(deltaTime);
 
@@ -120,9 +113,14 @@ export default function threeJsCanvas() {
     // console.log(users)
 
     // Call tick again on the next frame
-    window.requestAnimationFrame(tick);
+    // window.requestAnimationFrame(tick);
   };
-  tick();
+
+  // tick();
+
+  setInterval(() => {
+    tick();
+  }, 50);
 }
 
 // // car

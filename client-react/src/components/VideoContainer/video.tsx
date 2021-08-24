@@ -11,7 +11,7 @@ const Video = ({ stream, opacity }: Props) => {
   // const [isMuted, setIsMuted] = useState<boolean>(false);
 
   // const ref = useRef(null);
-  const [isMuted, setIsMuted] = useState(false);
+  // const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     if (ref.current) ref.current.srcObject = stream;
