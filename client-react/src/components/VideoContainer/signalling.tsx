@@ -8,46 +8,13 @@ import Video from "./video";
 import "./signalling.css";
 
 const Signalling: React.FC = () => {
-  // Get active users from store
-  let userConnectionGradients = {};
   const [connectedUsers, setConnectedUsers] = useState<any>([]);
-  let distances: any;
-  let conn: any = [];
-  // useStore.subscribe(
-  //   (prev, next: any) => {
-  //     distances = next;
-  //     let connState: any;
-  //     let webId;
-  //     if (distances) {
-  //       conn = [];
-  //       for ([webId, connState] of Object.entries(distances)) {
-  //         if (connState > 0) {
-  //           conn.push(webId);
-  //         }
-  //       }
-  //       if (conn.length !== connectedUsers.length) {
-  //         setConnectedUsers([...conn]);
-  //       }
-  //     }
-  //   },
-  //   (state) => state.distances
-  // );
-  // let scratch: any;
   useStore.subscribe(
     (prev: any, next) => {
       setConnectedUsers(prev);
-      // scratch = prev;
-      // if (users) {
-      //   console.log(users);
-      //   // let active = users.map((user) => prev.indexOf(user.id) !== -1);
-      //   // console.log(active, "hewnwepnewfpoefhwepo");
-      // }
     },
     (state) => state.conn
   );
-  // useEffect(() => {
-  //   console.log(scratch, "helllloooooo");
-  // }, [scratch]);
 
   const [socket, setSocket] = useState<any>();
   const [users, setUsers] = useState<Array<any>>([]); // Array of users' data (socket id, MediaStream)
@@ -356,35 +323,6 @@ const Signalling: React.FC = () => {
   // Insert opacity values into users array
 
   const opacity = 0.9;
-  // let temp = activeUsers[userSpecificId].connectionGradients
-  // opacity={user.connectionGradients.userId}
-
-  // useEffect(() => {
-  //   console.log("yoyoyoyoyyo");
-  //   let connState: any;
-  //   let webId;
-  //   if (distances) {
-  //     for ([webId, connState] of Object.entries(distances)) {
-  //       let whereInArray = conn.indexOf(webId);
-  //       console.log(whereInArray);
-  //       if (whereInArray !== -1) {
-  //         if (connState > 0) {
-  //         } else {
-  //           // console.log(conn, "beforesplice");
-  //           conn.splice(whereInArray, 1);
-  //           // console.log(conn, "aftersplice");
-  //         }
-  //       } else {
-  //         if (connState === 0) {
-  //           conn.push(webId);
-  //         }
-  //       }
-  //     }
-  //     if (conn.length !== connectedUsers.length) {
-  //       setConnectedUsers([...conn]);
-  //     }
-  //   }
-  // }, [distances]);
 
   // +++++++ VIDEO RENDERING +++++++ //
   return (
@@ -392,7 +330,6 @@ const Signalling: React.FC = () => {
       <div className="usersVideosBox">
         {users.map((user, index) => {
           if (user.id && connectedUsers.indexOf(user.id) !== -1) {
-            // if (true) {
             return <Video key={index} stream={user.stream} opacity={opacity} />;
           }
         })}
@@ -401,9 +338,9 @@ const Signalling: React.FC = () => {
         <div className="videoBox">
           <video
             className="videoTile"
-            muted
             ref={localVideoRef}
             autoPlay
+            muted={true}
           ></video>
         </div>
       </div>
