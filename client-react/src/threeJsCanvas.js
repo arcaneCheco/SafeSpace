@@ -115,7 +115,7 @@ export default function threeJsCanvas() {
   // tick();
 
   setInterval(() => {
-    window.requestAnimationFrame(tick);
+    tick();
   }, 50);
 }
 
