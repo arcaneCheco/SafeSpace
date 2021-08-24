@@ -343,7 +343,6 @@ const Signalling: React.FC = () => {
             muted={true}
             ref={localVideoRef}
             autoPlay
-            muted={true}
           ></video>
         </div>
       </div>
