@@ -4,6 +4,7 @@ import useStore from "./store";
 import { io } from "socket.io-client";
 import Visuals from "./visuals";
 import { waitUntil } from "async-wait-until";
+import "./models/3D-landscape/NatureGradientPack1.glb";
 
 export default function threeJsCanvas() {
   /**
@@ -27,9 +28,31 @@ export default function threeJsCanvas() {
   visuals.scene.add(ambientLight);
 
   /**
+   * load landscape
+   */
+
+  // const landscape = () => {
+  //   visuals.gltfLoader.load("/models/3D-landscape/NatureGradientPack1.glb", (gltf) => {
+  //     console.log(gltf, 'gltfff');
+  //     const dimensions = new THREE.Box3().setFromObject(gltf.scene);
+  //     // console.log('dimensions:', dimensions.max.x - dimensions.min.x, dimensions.max.y - dimensions.min.y, dimensions.max.z - dimensions.min.z)
+  //     gltf.scene.scale.set(24, 24, 24)
+  //     visuals.scene.add(gltf.scene);
+  //   },
+  //     function (xhr) {
+  //       console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+  //     },
+  //     function (error) {
+  //       console.log('An error happened');
+  //     }
+  //   );
+  // }
+  // landscape();
+
+  /**
    * establish socket connection
    */
-  const socket = io("http://localhost:3001/physicsNamespace");
+  const socket = io("http://localhost:3003/physicsNamespace");
 
   socket.on("connect", () => {
     console.log("Welcome to Safe Space");

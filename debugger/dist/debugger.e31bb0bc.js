@@ -57203,7 +57203,7 @@ var Visuals = /*#__PURE__*/function () {
   }, {
     key: "createGround",
     value: function createGround() {
-      var ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({
+      var ground = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), new THREE.MeshStandardMaterial({
         color: 0x222222
       }));
       ground.rotateX(-Math.PI / 2);
@@ -70526,8 +70526,8 @@ var Physics = /*#__PURE__*/function () {
 
     this.world = new CANNON.World();
     this.world.broadphase = new CANNON.SAPBroadphase(this.world);
-    this.world.gravity.set(0, -9.81, 0); // this.world.allowSleep = true;
-
+    this.world.gravity.set(0, -9.81, 0);
+    this.world.allowSleep = true;
     this.userBodies = {}; // this.world.defaultContactMaterial.friction = 0;
 
     this.groundMaterial = new CANNON.Material("groundMaterial");
@@ -70556,7 +70556,7 @@ var Physics = /*#__PURE__*/function () {
       });
       sphereBody.addShape(sphereShape);
       sphereBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
-      sphereBody.position.y = 5;
+      sphereBody.position.y = 8;
       sphereBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
       this.world.addBody(sphereBody);
       this.userBodies[id] = sphereBody;
@@ -70565,16 +70565,15 @@ var Physics = /*#__PURE__*/function () {
   }, {
     key: "createAndAddBoxAvatar",
     value: function createAndAddBoxAvatar(id) {
-      // const trans = new CANNON.Transform({ position: new CANNON.Vec3(4, 0, 0) });
       var boxShape = new CANNON.Box(new CANNON.Vec3(1.140032197089109 / 2 * 8, 1.5080219133341668 / 2 * 8, 0.3135272997496078 / 2 * 8));
       var boxBody = new CANNON.Body({
         mass: 1,
         material: this.userMaterial,
         angularDamping: 0.9,
-        fixedRotation: true,
-        shape: boxShape
-      }); // boxBody.addShape(boxShape);
+        fixedRotation: true // shape: boxShape,
 
+      });
+      boxBody.addShape(boxShape);
       boxBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
       boxBody.position.y = 10;
       boxBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
@@ -70585,18 +70584,21 @@ var Physics = /*#__PURE__*/function () {
   }, {
     key: "createAndAddCylAvatar",
     value: function createAndAddCylAvatar(id) {
-      var cylShape = new CANNON.Cylinder(2, 2, 1.5080219133341668 * 8, 12);
+      var cylShape = new CANNON.Cylinder(0.7, 0.7, 1.5080219133341668 * 4, 12);
       var cylBody = new CANNON.Body({
         mass: 1,
         material: this.userMaterial,
-        angularDamping: 0.9,
-        // fixedRotation: true,
+        // angularDamping: 0.9,
+        fixedRotation: true,
         shape: cylShape
       }); // boxBody.addShape(boxShape);
 
-      cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
-      cylBody.position.y = 10;
-      cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
+      cylBody.position.x = -49;
+      cylBody.position.y = 300;
+      cylBody.position.z = 0; // cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
+      // cylBody.position.y = 12;
+      // cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
+
       this.world.addBody(cylBody);
       this.userBodies[id] = cylBody;
       return cylBody.id;
@@ -70747,12 +70749,13 @@ var Physics = /*#__PURE__*/function () {
   }, {
     key: "navigateSphereAvatar",
     value: function navigateSphereAvatar(map) {
-      var force = 150;
+      // const force = 450;
+      var force = 1;
       var appliedForce = [0, 0, 0];
-      if (map.ArrowUp) appliedForce[2] = appliedForce[2] - force;
-      if (map.ArrowRight) appliedForce[0] = appliedForce[0] + force;
-      if (map.ArrowDown) appliedForce[2] = appliedForce[2] + force;
-      if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
+      if (map.ArrowUp) appliedForce[2] = appliedForce[2] - force; // if (map.ArrowRight) appliedForce[0] = appliedForce[0] + force;
+
+      if (map.ArrowDown) appliedForce[2] = appliedForce[2] + force; // if (map.ArrowLeft) appliedForce[0] = appliedForce[0] - force;
+
       return _construct(CANNON.Vec3, appliedForce);
     }
   }]);
@@ -70760,24 +70763,7 @@ var Physics = /*#__PURE__*/function () {
   return Physics;
 }();
 
-module.exports = Physics; // const physics = new Physics();
-// console.log(physics.world);
-// const car = physics.createCar(0.7);
-// car.addToWorld(physics.world);
-// let wheels = physics.createWheelBodies(car);
-// console.log(wheels);
-//
-// const deltaPosition = 0.1;
-// const navigateThroughPosition = (map) => {
-//   const positionVector = [0, 0, 0];
-//   if (map.ArrowUp) {
-//     positionVector[2] = positionVector[2] - deltaPosition;
-//   }
-//   if (map.ArrowRight) positionVector[0] = positionVector[0] + deltaPosition;
-//   if (map.ArrowDown) positionVector[2] = positionVector[2] + deltaPosition;
-//   if (map.ArrowLeft) positionVector[0] = positionVector[0] - deltaPosition;
-//   return positionVector;
-// };
+module.exports = Physics;
 },{"cannon-es":"../server/node_modules/cannon-es/dist/cannon-es.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
@@ -70840,10 +70826,33 @@ var loadModel = function loadModel() {
 };
 
 loadModel();
+
+var landscape = function landscape() {
+  visuals.gltfLoader.load("/models/CesiumMan/3D-landscape/NatureGradientPack1.glb", function (gltf) {
+    console.log(gltf, 'gltfff');
+    var dims = new THREE.Box3().setFromObject(gltf.scene);
+    console.log('dimensions:', dims.max.x - dims.min.x, dims.max.y - dims.min.y, dims.max.z - dims.min.z);
+    gltf.scene.scale.set(24, 24, 24);
+    visuals.scene.add(gltf.scene);
+  }, function (xhr) {
+    console.log(xhr.loaded / xhr.total * 100 + '% loaded');
+  }, function (error) {
+    console.log('An error happened');
+  });
+};
+
+landscape(); // const landShape = new THREE.Box3();
+// console.log(landShape, 'laaaaand');
+// landShape.setFromCenterAndSize(new THREE.Vector3(15, 15, 15), new THREE.Vector3(1, 1, 1));
+// const landHelper = new THREE.Box3Helper(landShape, '#ffffff');
+// visuals.scene.add(landHelper);
+
+/******/
+
 var physics = new _physics.default();
 (0, _cannonEsDebugger.default)(visuals.scene, physics.world.bodies);
 physics.addBoxGround();
-/***** */
+/******/
 
 var cylShape = new CANNON.Cylinder(scale * 0.5, scale * 0.5, 1.5080219133341668 * scale, 12);
 var cylBody = new CANNON.Body({
@@ -70953,7 +70962,7 @@ var tick = function tick() {
 };
 
 tick();
-},{"cannon-es":"node_modules/cannon-es/dist/cannon-es.js","cannon-es-debugger":"node_modules/cannon-es-debugger/dist/cannon-es-debugger.js","./visuals":"visuals.js","three":"node_modules/three/build/three.module.js","../server/physics":"../server/physics.js"}],"../../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"cannon-es":"node_modules/cannon-es/dist/cannon-es.js","cannon-es-debugger":"node_modules/cannon-es-debugger/dist/cannon-es-debugger.js","./visuals":"visuals.js","three":"node_modules/three/build/three.module.js","../server/physics":"../server/physics.js"}],"../../../.nvm/versions/node/v15.6.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -70981,7 +70990,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54396" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57808" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -71157,5 +71166,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
+},{}]},{},["../../../.nvm/versions/node/v15.6.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
 //# sourceMappingURL=/debugger.e31bb0bc.js.map

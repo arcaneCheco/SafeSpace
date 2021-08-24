@@ -38,11 +38,41 @@ const loadModel = () => {
 };
 loadModel();
 
+const landscape = () => {
+  visuals.gltfLoader.load("/models/CesiumMan/3D-landscape/NatureGradientPack1.glb", (gltf) => {
+    console.log(gltf, 'gltfff');
+    const dims = new THREE.Box3().setFromObject(gltf.scene);
+    console.log('dimensions:', dims.max.x - dims.min.x, dims.max.y - dims.min.y, dims.max.z - dims.min.z)
+    gltf.scene.scale.set(24, 24, 24)
+    visuals.scene.add(gltf.scene);
+  },
+    function (xhr) {
+      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+
+    },
+    function (error) {
+      console.log('An error happened');
+    }
+  );
+}
+landscape();
+
+
+// const landShape = new THREE.Box3();
+// console.log(landShape, 'laaaaand');
+// landShape.setFromCenterAndSize(new THREE.Vector3(15, 15, 15), new THREE.Vector3(1, 1, 1));
+// const landHelper = new THREE.Box3Helper(landShape, '#ffffff');
+// visuals.scene.add(landHelper);
+
+
+
+/******/
+
 const physics = new Physics();
 cannonDebugger(visuals.scene, physics.world.bodies);
 physics.addBoxGround();
 
-/***** */
+/******/
 const cylShape = new CANNON.Cylinder(
   scale * 0.5,
   scale * 0.5,

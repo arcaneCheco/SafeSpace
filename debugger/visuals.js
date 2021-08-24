@@ -63,7 +63,7 @@ export default class Visuals {
   }
   createGround() {
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(100, 100),
+      new THREE.PlaneGeometry(500, 500),
       new THREE.MeshStandardMaterial({ color: 0x222222 })
     );
     ground.rotateX(-Math.PI / 2);

@@ -30,10 +30,11 @@ export default class Visuals {
     this.orbitControls.enableDamping = true;
     this.renderer = new THREE.WebGLRenderer({ canvas });
     this.configRenderer();
-    this.createGround();
+    // this.createGround();
     this.setDRACOLoader();
     this.setGLTFLoader();
     this.loadAvatar();
+    this.loadLandscape();
     this.scene.add(this.camera);
     // third person view init
     // this.goal = new THREE.Object3D();
@@ -125,6 +126,27 @@ export default class Visuals {
       this.avatar.action.play();
       this.avatar.isLoaded = true;
     });
+  }
+  loadLandscape() {
+    this.gltfLoader.load("/models/3D-landscape/NatureGradientPack1.glb", (gltf) => {
+      console.log(gltf, 'gltfff');
+      // const dimensions = new THREE.Box3().setFromObject(gltf.scene);
+      // console.log(gltf.scene.children[6].scale)
+      gltf.scene.scale.set(5, 5, 5)
+      // gltf.scene.children[6].scale.set(24 * helper.x, 24 * helper.y, 24 * helper.z)
+      //const scratch = gltf.scene.children[6]
+      // console.log('dimensions:', dimensions.max.x - dimensions.min.x, dimensions.max.y - dimensions.min.y, dimensions.max.z - dimensions.min.z)
+      gltf.scene.children[6].position.y += 0.1;
+      //this.scene.add(scratch);
+      this.scene.add(gltf.scene);
+    },
+      function (xhr) {
+        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+      },
+      function (error) {
+        console.log('An error happened');
+      }
+    );
   }
   configRenderer() {
     this.renderer.shadowMap.enabled = true;
