@@ -15,14 +15,13 @@ const webRTC = new WebRTCFuncs();
 module.exports = (io) => {
   io.on("connection", (socket) => {
     socket.on("joinRoom", (data) => {
-
       webRTCUsers[socket.id] = {
         webRTCSocketId: socket.id,
       };
       socket.client.webRTCSocketid = socket.id;
-      console.log(socket.client.webRTCSocketid)
+      // console.log(socket.client.webRTCSocketid)
 
-      console.log("web RTCUsers ", webRTCUsers);
+      // console.log("web RTCUsers ", webRTCUsers);
       try {
         let allUsers = webRTC.getOtherUsersInRoom(data.id, data.roomID);
         io.to(data.id).emit("allUsers", { users: allUsers });
@@ -56,9 +55,9 @@ module.exports = (io) => {
 
     // Adds RTCIceCandidate to the RTCPeerConnection that's saved when the user sends an offer
     // data.candidate - RTCICeCandidate of user
-    socket.on("senderCandidate", (data) => {
+    socket.on("senderCandidate", async (data) => {
       try {
-        let pc = webRTC.receiverPCs[data.senderSocketID];
+        let pc = await webRTC.receiverPCs[data.senderSocketID];
         pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
       } catch (error) {
         console.log(error);

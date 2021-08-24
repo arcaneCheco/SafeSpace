@@ -4,6 +4,8 @@ import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { SkeletonUtils } from "three/examples/jsm/utils/SkeletonUtils";
+import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
+import gsap from "gsap";
 
 export default class Visuals {
   constructor(canvas) {
@@ -13,6 +15,7 @@ export default class Visuals {
     this.avatar = {};
     this.userId = "";
     this.map = {};
+    this.hasEntered = false;
     this.sizes = {
       width: window.innerWidth,
       height: window.innerHeight,
@@ -34,14 +37,121 @@ export default class Visuals {
     this.setDRACOLoader();
     this.setGLTFLoader();
     this.loadAvatar();
+    this.textureLoader = new THREE.TextureLoader();
     this.scene.add(this.camera);
-    // third person view init
-    // this.goal = new THREE.Object3D();
-    // this.userMeshes[this.userId].add(this.goal);
-    // this.goal.position.set(1, 10, 2);
-    ////////////
+    this.cameraIsInitialized = false;
     window.addEventListener("resize", () => this.resize());
     document.onkeydown = document.onkeyup = (e) => this.keyboardControls(e);
+    this.gui = new GUI();
+    this.addGUIcontrol();
+    ///welcome screen stuff
+    this.raycaster = new THREE.Raycaster();
+    this.fontLoader = new THREE.FontLoader();
+    this.welcomeLights = new THREE.Group();
+    this.welcomeText = new THREE.Group();
+    this.welcomeText.rotateX(-Math.PI / 4);
+    this.welcomeText.position.set(0, 75, 25);
+    this.scene.add(this.welcomeLights, this.welcomeText);
+    this.mouse = new THREE.Vector2();
+    this.enterText = null;
+    window.addEventListener("mousemove", (event) => {
+      this.mouse.x = (event.clientX / this.sizes.width) * 2 - 1;
+      this.mouse.y = -(event.clientY / this.sizes.height) * 2 + 1;
+    });
+    window.addEventListener("click", this.enterClickHandler.bind(this), false);
+    this.createWelcomeScreen();
+    ////////
+  }
+  createWelcomeScreen() {
+    this.camera.position.set(0, 100, 50);
+    this.setWelcomeLight();
+    this.createText("Welcome", 2, 0, -5);
+    this.createText("to", 2, -5, -4);
+    this.createText("SafeSpace", 4, -10, -3);
+    this.createText("Enter", 2, -15, 0);
+  }
+  enterClickHandler() {
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    let isIntersected = this.raycaster.intersectObject(this.enterText);
+    if (isIntersected.length > 0) {
+      console.log("Mesh clicked!");
+      // this.hasEntered = true;
+      // this.scene.
+    }
+  }
+  createText(text, size, offsetY, offsetZ) {
+    this.fontLoader.load("/fonts/ArkitechStencil_Regular.json", (font) => {
+      const textGeometry = new THREE.TextGeometry(text, {
+        font,
+        size: size,
+        height: 0.2,
+        curveSegments: 6,
+        bevelEnabled: true,
+        bevelThickness: 0.03,
+        bevelSize: 0.02,
+        bevelOffset: 0,
+        bevelSegments: 4,
+      });
+
+      textGeometry.center();
+      const textMaterial = new THREE.MeshStandardMaterial();
+      const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+      textMesh.position.set(2, 2 + offsetY, 2 + offsetZ);
+      console.log(textMesh);
+      this.welcomeText.add(textMesh);
+      if (text === "Enter") {
+        this.enterText = textMesh;
+      }
+    });
+  }
+  setWelcomeLight() {
+    const pointLight = new THREE.PointLight(0xddd23b);
+    const pointLightHelper = new THREE.PointLightHelper(pointLight);
+    pointLight.position.set(0, 25, 0);
+    pointLight.intensity = 3;
+    this.welcomeLights.add(pointLight, pointLightHelper);
+    const rectLight = new THREE.RectAreaLight(0x51a8dd, 2, 10, 10);
+    rectLight.position.set(5, 5, 0);
+    rectLight.lookAt(0, 0, 0);
+    const rectLightHelper = new RectAreaLightHelper(rectLight);
+    this.welcomeLights.add(rectLight, rectLightHelper);
+    this.gui.add(rectLight, "intensity").min(0.1).max(10).step(0.001);
+  }
+  addGUIcontrol() {
+    this.gui.add(this.camera.position, "x").min(-50).max(50).step(0.1);
+    this.gui.add(this.camera.position, "y").min(-50).max(250).step(0.1);
+    this.gui.add(this.camera.position, "z").min(-50).max(50).step(0.1);
+  }
+  // updateThirdPersonViewPerspective()
+  initializeCamera() {
+    this.goal = new THREE.Object3D();
+    // this.goal.add(this.userMeshes[this.userId]);
+    this.userMeshes[this.userId].add(this.goal);
+    this.goal.position.set(0.5, 6, 3);
+    this.temp = new THREE.Vector3();
+  }
+  updateThirdPersonViewPerspective() {
+    if (!this.carmeraIsInitialized) {
+      if (this.userMeshes[this.userId]) {
+        this.initializeCamera();
+        this.carmeraIsInitialized = true;
+      } else {
+        return;
+      }
+    } else {
+      this.temp.setFromMatrixPosition(this.goal.matrixWorld);
+      this.camera.position.lerp(this.temp, 0.2);
+      this.camera.lookAt(this.userMeshes[this.userId].position);
+    }
+  }
+  updateAvatarModeCamera(target) {
+    let offset = new THREE.Vector3(
+      target.position.x + 2,
+      target.position.y + 20,
+      target.position.z + 20
+    );
+    this.camera.position.copy(offset);
+    this.camera.lookAt(target.position);
   }
   joiningUser(id, activeUsers) {
     this.userId = id;
@@ -55,7 +165,6 @@ export default class Visuals {
       this.userMeshes[userId].position.copy(userData.position);
       this.scene.add(this.userMeshes[userId]);
     }
-    console.log(this.userMeshes);
   }
   removeUser(id) {
     this.scene.remove(this.scene.getObjectByName(this.userMeshes[id].name));
@@ -69,7 +178,7 @@ export default class Visuals {
       e.key === "ArrowLeft"
     )
       this.map[e.key] = e.type === "keydown";
-    console.log(this.map);
+    // console.log(this.map);
   }
   resize() {
     // Update sizes
@@ -89,25 +198,8 @@ export default class Visuals {
         this.userMeshes[userId].quaternion.copy(userData.quaternion);
       }
     }
+  }
 
-    // updateThirdPersonViewPerspective()
-  }
-  // updateThirdPersonViewPerspective() {
-  //   if (this.userMeshes[this.userId]) {
-  //     this.temp.setFromMatrixPosition(this.goal.matrixWorld);
-  //     this.camera.position.lerp(this.temp, 0.2);
-  //     this.camera.lookAt(this.userMeshes[this.userId].position);
-  //   }
-  // }
-  updateAvatarModeCamera(target) {
-    let offset = new THREE.Vector3(
-      target.position.x + 2,
-      target.position.y + 20,
-      target.position.z + 20
-    );
-    this.camera.position.copy(offset);
-    this.camera.lookAt(target.position);
-  }
   addNewUser(id, userData) {
     const newMesh = SkeletonUtils.clone(this.avatar.mesh);
     this.userMeshes[id] = SkeletonUtils.clone(this.avatar.mesh);
