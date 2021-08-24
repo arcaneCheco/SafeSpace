@@ -11,6 +11,7 @@ export default class Visuals {
     this.scene = new THREE.Scene();
     this.userMeshes = {};
     this.avatar = {};
+    this.avatars = [];
     this.userId = "";
     this.map = {};
     this.sizes = {
@@ -87,11 +88,20 @@ export default class Visuals {
       if (this.userMeshes[userId]) {
         this.userMeshes[userId].position.copy(userData.position);
         this.userMeshes[userId].quaternion.copy(userData.quaternion);
+        // this.userMeshes[userId].mixer.update();
+        // console.log('here', this.userMeshes[userId])
       }
     }
-
-    // updateThirdPersonViewPerspective()
   }
+
+  updateAnimationStates(activeUsers, deltaTime) {
+    for (const [userId, userData] of Object.entries(activeUsers)) {
+      if (this.userMeshes[userId]) {
+        this.userMeshes[userId].mixer.update(deltaTime);
+      }
+    }
+  }
+  // updateThirdPersonViewPerspective()
   // updateThirdPersonViewPerspective() {
   //   if (this.userMeshes[this.userId]) {
   //     this.temp.setFromMatrixPosition(this.goal.matrixWorld);
@@ -109,11 +119,26 @@ export default class Visuals {
     this.camera.lookAt(target.position);
   }
   addNewUser(id, userData) {
-    const newMesh = SkeletonUtils.clone(this.avatar.mesh);
     this.userMeshes[id] = SkeletonUtils.clone(this.avatar.mesh);
+    this.userMeshes[id].mixer = this.avatar.mixer;
+    this.userMeshes[id].action = this.avatar.action;
+    this.userMeshes[id].action.play();
     this.userMeshes[id].name = userData.username;
     this.userMeshes[id].position.copy(userData.position);
     this.scene.add(this.userMeshes[id]);
+  }
+  loadNewAvatar(id, userData) {
+    this.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
+      this.avatar.mesh = gltf.scene.children[0];
+      this.avatar.mixer = new THREE.AnimationMixer(gltf.scene);
+      this.avatar.action = this.avatar.mixer.clipAction(gltf.animations[0]);
+      this.avatar.mesh.scale.set(4, 4, 4);
+      this.avatar.mesh.rotateZ(Math.PI);
+      this.avatar.action.play();
+      this.avatar.isLoaded = true;
+    });
+    this.avatars.push(this.avatar)
+    console.log(this.avatars)
   }
   loadAvatar() {
     this.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {

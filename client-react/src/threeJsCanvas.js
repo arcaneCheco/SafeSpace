@@ -63,11 +63,10 @@ export default function threeJsCanvas() {
     useStore.setState({ userSpecificId: userSpecificId })
   );
 
-  socket.on("add new user", (id, newUser) => visuals.addNewUser(id, newUser));
+  socket.on("add new user", (id, newUser) => visuals.loadNewAvatar(id, newUser));
 
   socket.on("update", (activeUsers) => {
     visuals.updateUserStates(activeUsers);
-    // useStore.setState({ activeUsers: activeUsers });
   });
   socket.on("new distances", (distances) => {
     // useStore.setState({ distances });
@@ -109,6 +108,9 @@ export default function threeJsCanvas() {
     //update animaations
     if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
       visuals.avatar.mixer.update(deltaTime);
+
+      visuals.avatars.forEach(avatar => avatar.mixer.update(deltaTime))
+
     }
 
     // Render
