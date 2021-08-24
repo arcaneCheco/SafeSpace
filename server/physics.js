@@ -10,7 +10,7 @@ class Physics {
     // this.world.defaultContactMaterial.friction = 0;
     this.groundMaterial = new CANNON.Material("groundMaterial");
     this.groundMaterial.friction = 0.15;
-    this.groundMaterial.restitution = 0.25;
+    this.groundMaterial.restitution = 0.55;
     this.userMaterial = new CANNON.Material("userMaterial");
     this.userMaterial.friction = 0.15;
     this.userMaterial.restitution = 0.25;
@@ -101,6 +101,17 @@ class Physics {
     groundBody.position.z = 0;
     this.world.addBody(groundBody);
   }
+  addPlaneGround() {
+    const planeShape = new CANNON.Plane();
+    const planeBody = new CANNON.Body({
+      mass: 0,
+      material: this.groundMaterial,
+    });
+    planeBody.addShape(planeShape);
+    planeBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+    this.world.addBody(planeBody);
+  }
+
   createCarChassis() {
     const chassisShape = new CANNON.Box(new CANNON.Vec3(1, 0.3, 2));
     const chassisBody = new CANNON.Body({ mass: 150 });

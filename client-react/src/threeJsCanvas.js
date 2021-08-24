@@ -29,7 +29,7 @@ export default function threeJsCanvas() {
   /**
    * establish socket connection
    */
-  const socket = io("http://localhost:3001/physicsNamespace");
+  const socket = io("http://localhost:3003/physicsNamespace");
 
   socket.on("connect", () => {
     console.log("Welcome to Safe Space");

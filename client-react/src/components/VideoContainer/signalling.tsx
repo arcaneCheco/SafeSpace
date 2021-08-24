@@ -39,7 +39,7 @@ const Signalling: React.FC = () => {
   };
 
   useEffect(() => {
-    let newSocket = io("http://localhost:3001/webRTCNamespace");
+    let newSocket = io("http://localhost:3003/webRTCNamespace");
     let localStream: MediaStream;
 
     newSocket.on("connection", () => {
@@ -322,7 +322,7 @@ const Signalling: React.FC = () => {
 
   // Insert opacity values into users array
 
-  const opacity = 0.9;
+  const opacity = 1;
 
   // +++++++ VIDEO RENDERING +++++++ //
   return (

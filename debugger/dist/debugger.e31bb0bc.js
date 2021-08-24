@@ -57203,7 +57203,7 @@ var Visuals = /*#__PURE__*/function () {
   }, {
     key: "createGround",
     value: function createGround() {
-      var ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({
+      var ground = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), new THREE.MeshStandardMaterial({
         color: 0x222222
       }));
       ground.rotateX(-Math.PI / 2);
@@ -70532,7 +70532,7 @@ var Physics = /*#__PURE__*/function () {
 
     this.groundMaterial = new CANNON.Material("groundMaterial");
     this.groundMaterial.friction = 0.15;
-    this.groundMaterial.restitution = 0.25;
+    this.groundMaterial.restitution = 0.55;
     this.userMaterial = new CANNON.Material("userMaterial");
     this.userMaterial.friction = 0.15;
     this.userMaterial.restitution = 0.25;
@@ -70623,6 +70623,18 @@ var Physics = /*#__PURE__*/function () {
       groundBody.position.y = -1;
       groundBody.position.z = 0;
       this.world.addBody(groundBody);
+    }
+  }, {
+    key: "addPlaneGround",
+    value: function addPlaneGround() {
+      var planeShape = new CANNON.Plane();
+      var planeBody = new CANNON.Body({
+        mass: 0,
+        material: this.groundMaterial
+      });
+      planeBody.addShape(planeShape);
+      planeBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+      this.world.addBody(planeBody);
     }
   }, {
     key: "createCarChassis",
@@ -70796,7 +70808,7 @@ var avatar = null;
 var isLoaded = false; // window.addEventListener("resize", visuals.resize);
 // load model
 
-var scale = 8;
+var scale = 4;
 
 var loadModel = function loadModel() {
   visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", function (gltf) {
@@ -70823,6 +70835,7 @@ var loadModel = function loadModel() {
 };
 
 loadModel();
+<<<<<<< HEAD
 var physics = new _physics.default(); // physics.addBoxGround();
 
 console.log(physics.world.bodies);
@@ -70835,6 +70848,35 @@ groundBody.addShape(groundShape);
 groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 physics.world.addBody(groundBody);
 /***** */
+=======
+
+var loadLandscape = function loadLandscape() {
+  visuals.gltfLoader.load("/models/CesiumMan/3D-landscape/NatureGradientPack2.glb", function (gltf) {
+    console.log(gltf, 'gltfff');
+    gltf.scene.scale.set(17, 17, 17);
+    gltf.scene.children[6].position.y += 0.001;
+    visuals.scene.add(gltf.scene);
+  }, function (xhr) {
+    console.log(xhr.loaded / xhr.total * 100 + '% loaded');
+  }, function (error) {
+    console.log('An error happened');
+  });
+};
+
+loadLandscape();
+/******/
+
+var physics = new _physics.default();
+(0, _cannonEsDebugger.default)(visuals.scene, physics.world.bodies); // physics.addBoxGround();
+
+physics.addPlaneGround(); // const groundShape = new CANNON.Plane();
+// const groundBody = new CANNON.Body({ mass: 0 });
+// groundBody.addShape(groundShape);
+// groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+// physics.world.addBody(groundBody);
+
+/******/
+>>>>>>> 3a0558d22ecb802642b070a4bd29b0c64f9b3a68
 
 var cylShape = new CANNON.Cylinder(scale * 0.5, scale * 0.5, 1.5080219133341668 * scale, 12);
 var cylBody = new CANNON.Body({
@@ -70944,7 +70986,11 @@ var tick = function tick() {
 };
 
 tick();
+<<<<<<< HEAD
 },{"three":"node_modules/three/build/three.module.js","cannon-es":"node_modules/cannon-es/dist/cannon-es.js","cannon-es-debugger":"node_modules/cannon-es-debugger/dist/cannon-es-debugger.js","./visuals":"visuals.js","../server/physics":"../server/physics.js"}],"../../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+=======
+},{"cannon-es":"node_modules/cannon-es/dist/cannon-es.js","cannon-es-debugger":"node_modules/cannon-es-debugger/dist/cannon-es-debugger.js","./visuals":"visuals.js","three":"node_modules/three/build/three.module.js","../server/physics":"../server/physics.js"}],"../../../.nvm/versions/node/v15.6.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+>>>>>>> 3a0558d22ecb802642b070a4bd29b0c64f9b3a68
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -70972,7 +71018,11 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+<<<<<<< HEAD
   var ws = new WebSocket(protocol + '://' + hostname + ':' + "51554" + '/');
+=======
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63013" + '/');
+>>>>>>> 3a0558d22ecb802642b070a4bd29b0c64f9b3a68
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -71148,5 +71198,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
+},{}]},{},["../../../.nvm/versions/node/v15.6.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
 //# sourceMappingURL=/debugger.e31bb0bc.js.map

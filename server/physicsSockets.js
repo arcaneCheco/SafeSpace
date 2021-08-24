@@ -49,8 +49,7 @@ const updateConnectionGradients = (distanceToOtherUsers) => {
 };
 
 const physics = new Physics();
-// ground
-physics.addBoxGround();
+physics.addPlaneGround();
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
@@ -78,8 +77,7 @@ module.exports = (io) => {
       // activeUsers[socket.id].webRTCSocketid = socket.client.webRTCSocketid;
       socket.emit("joined", socket.id, activeUsers);
       console.log(
-        `user with physicsid ${socket.id} and webRTC id ${
-          activeUsers[socket.id].webRTCSocketid
+        `user with physicsid ${socket.id} and webRTC id ${activeUsers[socket.id].webRTCSocketid
         } just joined`
       );
       io.to(socket.id).emit("userSpecificId", socket.id);

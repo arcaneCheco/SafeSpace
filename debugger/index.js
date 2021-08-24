@@ -17,7 +17,7 @@ let avatar = null;
 let isLoaded = false;
 // window.addEventListener("resize", visuals.resize);
 // load model
-const scale = 8;
+const scale = 4;
 const loadModel = () => {
   visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
     // cesum man mesh size before scaling:
@@ -39,18 +39,49 @@ const loadModel = () => {
 };
 loadModel();
 
+const loadLandscape = () => {
+  visuals.gltfLoader.load("/models/CesiumMan/3D-landscape/NatureGradientPack2.glb", (gltf) => {
+    console.log(gltf, 'gltfff');
+    gltf.scene.scale.set(17, 17, 17)
+    gltf.scene.children[6].position.y += 0.001;
+    visuals.scene.add(gltf.scene);
+  },
+    function (xhr) {
+      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    },
+    function (error) {
+      console.log('An error happened');
+    }
+  );
+}
+loadLandscape();
+
+
+/******/
+
 const physics = new Physics();
 // physics.addBoxGround();
 console.log(physics.world.bodies);
 cannonDebugger(visuals.scene, physics.world.bodies);
+<<<<<<< HEAD
 
 const groundShape = new CANNON.Plane();
 const groundBody = new CANNON.Body({ mass: 0 });
 groundBody.addShape(groundShape);
 groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 physics.world.addBody(groundBody);
+=======
+// physics.addBoxGround();
+physics.addPlaneGround();
 
-/***** */
+// const groundShape = new CANNON.Plane();
+// const groundBody = new CANNON.Body({ mass: 0 });
+// groundBody.addShape(groundShape);
+// groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+// physics.world.addBody(groundBody);
+>>>>>>> 3a0558d22ecb802642b070a4bd29b0c64f9b3a68
+
+/******/
 const cylShape = new CANNON.Cylinder(
   scale * 0.5,
   scale * 0.5,

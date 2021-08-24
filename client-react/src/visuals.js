@@ -33,11 +33,12 @@ export default class Visuals {
     this.orbitControls.enableDamping = true;
     this.renderer = new THREE.WebGLRenderer({ canvas });
     this.configRenderer();
-    this.createGround();
+    // this.createGround();
     this.setDRACOLoader();
     this.setGLTFLoader();
     this.loadAvatar();
     this.textureLoader = new THREE.TextureLoader();
+    this.loadLandscape();
     this.scene.add(this.camera);
     this.cameraIsInitialized = false;
     window.addEventListener("resize", () => this.resize());
@@ -217,6 +218,23 @@ export default class Visuals {
       this.avatar.action.play();
       this.avatar.isLoaded = true;
     });
+  }
+  loadLandscape() {
+    this.gltfLoader.load(
+      "/models/3D-landscape/NatureGradientPack2.glb",
+      (gltf) => {
+        console.log(gltf, "gltfff");
+        gltf.scene.scale.set(17, 17, 17);
+        gltf.scene.children[6].position.y += 0.001;
+        this.scene.add(gltf.scene);
+      },
+      function (xhr) {
+        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+      },
+      function (error) {
+        console.log("An error happened");
+      }
+    );
   }
   configRenderer() {
     this.renderer.shadowMap.enabled = true;
