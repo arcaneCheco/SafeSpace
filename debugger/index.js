@@ -1,7 +1,7 @@
+import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import cannonDebugger from "cannon-es-debugger";
 import Visuals from "./visuals";
-import * as THREE from "three";
 import Physics from "../server/physics";
 
 const visuals = new Visuals(document.querySelector("#canvas"));
@@ -22,14 +22,15 @@ const loadModel = () => {
   visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
     // cesum man mesh size before scaling:
     // 1.140032197089109 1.5080219133341668 0.3135272997496078
-    console.log(gltf);
+    // console.log(gltf);
     const mixer = new THREE.AnimationMixer(gltf.scene);
     const action = mixer.clipAction(gltf.animations[0]);
     const mesh = gltf.scene.children[0];
-    console.log(mesh);
+    // console.log(mesh);
     // const box = new THREE.Box3().setFromObject(mesh);
     mesh.scale.set(scale, scale, scale);
     mesh.rotateZ(Math.PI);
+    mesh.position.z = 5;
     avatar = { action, mesh, mixer };
     visuals.scene.add(avatar.mesh);
     avatar.action.play();
@@ -39,8 +40,15 @@ const loadModel = () => {
 loadModel();
 
 const physics = new Physics();
+// physics.addBoxGround();
+console.log(physics.world.bodies);
 cannonDebugger(visuals.scene, physics.world.bodies);
-physics.addBoxGround();
+
+const groundShape = new CANNON.Plane();
+const groundBody = new CANNON.Body({ mass: 0 });
+groundBody.addShape(groundShape);
+groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+physics.world.addBody(groundBody);
 
 /***** */
 const cylShape = new CANNON.Cylinder(
@@ -118,7 +126,7 @@ document.onkeydown = document.onkeyup = (e) => {
     map[e.key] = e.type === "keydown";
 };
 const navigateSphereAvatar = (map) => {
-  const force = 250;
+  const force = 500;
   const appliedForce = [0, 0, 0];
   if (map.ArrowUp) appliedForce[2] = appliedForce[2] - force;
   if (map.ArrowRight) appliedForce[0] = appliedForce[0] + force;

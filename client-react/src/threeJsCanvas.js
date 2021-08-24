@@ -48,14 +48,7 @@ export default function threeJsCanvas() {
   socket.on("joined", (id, activeUsers) => {
     visuals.joiningUser(id, activeUsers);
     hasJoined = true;
-    // setInterval(() => {
-    //   socket.emit("update", visuals.map, controlModes);
-    // }, 50);
   });
-
-  socket.on("userSpecificId", (userSpecificId) =>
-    useStore.setState({ userSpecificId: userSpecificId })
-  );
 
   socket.on("add new user", (id, newUser) => visuals.addNewUser(id, newUser));
 
@@ -95,7 +88,7 @@ export default function threeJsCanvas() {
     visuals.orbitControls.update();
 
     // update camera
-    visuals.updateThirdPersonViewPerspective();
+    visuals.hasEntered && visuals.updateThirdPersonViewPerspective();
 
     // udpate animation
     if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
@@ -115,7 +108,8 @@ export default function threeJsCanvas() {
   // tick();
 
   setInterval(() => {
-    window.requestAnimationFrame(tick);
+    // window.requestAnimationFrame(tick);
+    tick();
   }, 50);
 }
 
