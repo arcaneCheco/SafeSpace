@@ -11,7 +11,8 @@ export default class Visuals {
     this.scene = new THREE.Scene();
     this.userMeshes = {};
     this.avatar = {};
-    this.avatars = [];
+    this.avatarAnimation = {};
+    this.mixers = [];
     this.userId = "";
     this.map = {};
     this.sizes = {
@@ -84,7 +85,7 @@ export default class Visuals {
       this.userMeshes[userId].position.copy(userData.position);
       this.scene.add(this.userMeshes[userId]);
     }
-    console.log(this.userMeshes);
+    // console.log(this.userMeshes);
   }
   removeUser(id) {
     this.scene.remove(this.scene.getObjectByName(this.userMeshes[id].name));
@@ -148,36 +149,30 @@ export default class Visuals {
   }
 
   addNewUser(id, userData) {
-    this.userMeshes[id] = SkeletonUtils.clone(this.avatar.mesh);
-    this.userMeshes[id].mixer = this.avatar.mixer;
-    this.userMeshes[id].action = this.avatar.action;
-    this.userMeshes[id].action.play();
+    let clone = SkeletonUtils.clone(this.avatar.mesh)
+    this.userMeshes[id] = clone;
+    this.scene.add(clone);
     this.userMeshes[id].name = userData.username;
     this.userMeshes[id].position.copy(userData.position);
-    this.scene.add(this.userMeshes[id]);
+    this.userMeshes[id].mixer = new THREE.AnimationMixer(clone);
+    this.userMeshes[id].action = this.userMeshes[id].mixer.clipAction(this.avatarAnimation)
+    this.userMeshes[id].action.play();
+    this.mixers.push(this.userMeshes[id]);
+    console.log(this.mixers)
   }
-  loadNewAvatar(id, userData) {
-    this.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
-      this.avatar.mesh = gltf.scene.children[0];
-      this.avatar.mixer = new THREE.AnimationMixer(gltf.scene);
-      this.avatar.action = this.avatar.mixer.clipAction(gltf.animations[0]);
-      this.avatar.mesh.scale.set(4, 4, 4);
-      this.avatar.mesh.rotateZ(Math.PI);
-      this.avatar.action.play();
-      this.avatar.isLoaded = true;
-    });
-    this.avatars.push(this.avatar)
-    console.log(this.avatars)
-  }
+
   loadAvatar() {
     this.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
+      this.avatarAnimation = gltf.animations[0];
       this.avatar.mesh = gltf.scene.children[0];
       this.avatar.mixer = new THREE.AnimationMixer(gltf.scene);
-      this.avatar.action = this.avatar.mixer.clipAction(gltf.animations[0]);
+      this.avatar.action = this.avatar.mixer.clipAction(this.avatarAnimation);
       this.avatar.mesh.scale.set(4, 4, 4);
       this.avatar.mesh.rotateZ(Math.PI);
       this.avatar.action.play();
       this.avatar.isLoaded = true;
+      this.mixers.push(this.avatar);
+      console.log(this.mixers)
     });
   }
   configRenderer() {

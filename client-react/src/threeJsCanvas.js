@@ -58,7 +58,7 @@ export default function threeJsCanvas() {
     useStore.setState({ userSpecificId: userSpecificId })
   );
 
-  socket.on("add new user", (id, newUser) => visuals.loadNewAvatar(id, newUser));
+  socket.on("add new user", (id, newUser) => visuals.addNewUser(id, newUser));
 
   socket.on("update", (activeUsers) => {
     visuals.updateUserStates(activeUsers);
@@ -101,10 +101,14 @@ export default function threeJsCanvas() {
     // udpate animation
     if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
       visuals.avatar.mixer.update(deltaTime);
-
-      visuals.avatars.forEach(avatar => avatar.mixer.update(deltaTime))
-
+      // console.log(visuals.avatar.mixer)
     }
+
+
+    visuals.mixers.forEach(mixer => {
+      mixer.mixer.update(deltaTime)
+      // console.log(mixer)
+    })
 
     // Render
     visuals.renderer.render(visuals.scene, visuals.camera);
