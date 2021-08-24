@@ -70532,7 +70532,7 @@ var Physics = /*#__PURE__*/function () {
 
     this.groundMaterial = new CANNON.Material("groundMaterial");
     this.groundMaterial.friction = 0.15;
-    this.groundMaterial.restitution = 0.25;
+    this.groundMaterial.restitution = 0.55;
     this.userMaterial = new CANNON.Material("userMaterial");
     this.userMaterial.friction = 0.15;
     this.userMaterial.restitution = 0.25;
@@ -70591,14 +70591,10 @@ var Physics = /*#__PURE__*/function () {
         // angularDamping: 0.9,
         fixedRotation: true,
         shape: cylShape
-      }); // boxBody.addShape(boxShape);
-
-      cylBody.position.x = -49;
-      cylBody.position.y = 300;
-      cylBody.position.z = 0; // cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 5;
-      // cylBody.position.y = 12;
-      // cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 5;
-
+      });
+      cylBody.position.x = Math.sin((Math.random() - 0.5) * 2 * Math.PI) * 10;
+      cylBody.position.y = 12;
+      cylBody.position.z = Math.cos((Math.random() - 0.5) * 2 * Math.PI) * 10;
       this.world.addBody(cylBody);
       this.userBodies[id] = cylBody;
       return cylBody.id;
@@ -70627,6 +70623,18 @@ var Physics = /*#__PURE__*/function () {
       groundBody.position.y = -1;
       groundBody.position.z = 0;
       this.world.addBody(groundBody);
+    }
+  }, {
+    key: "addPlaneGround",
+    value: function addPlaneGround() {
+      var planeShape = new CANNON.Plane();
+      var planeBody = new CANNON.Body({
+        mass: 0,
+        material: this.groundMaterial
+      });
+      planeBody.addShape(planeShape);
+      planeBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+      this.world.addBody(planeBody);
     }
   }, {
     key: "createCarChassis",
@@ -70800,7 +70808,7 @@ var avatar = null;
 var isLoaded = false; // window.addEventListener("resize", visuals.resize);
 // load model
 
-var scale = 8;
+var scale = 4;
 
 var loadModel = function loadModel() {
   visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", function (gltf) {
@@ -70827,12 +70835,11 @@ var loadModel = function loadModel() {
 
 loadModel();
 
-var landscape = function landscape() {
-  visuals.gltfLoader.load("/models/CesiumMan/3D-landscape/NatureGradientPack1.glb", function (gltf) {
+var loadLandscape = function loadLandscape() {
+  visuals.gltfLoader.load("/models/CesiumMan/3D-landscape/NatureGradientPack2.glb", function (gltf) {
     console.log(gltf, 'gltfff');
-    var dims = new THREE.Box3().setFromObject(gltf.scene);
-    console.log('dimensions:', dims.max.x - dims.min.x, dims.max.y - dims.min.y, dims.max.z - dims.min.z);
-    gltf.scene.scale.set(24, 24, 24);
+    gltf.scene.scale.set(17, 17, 17);
+    gltf.scene.children[6].position.y += 0.001;
     visuals.scene.add(gltf.scene);
   }, function (xhr) {
     console.log(xhr.loaded / xhr.total * 100 + '% loaded');
@@ -70841,17 +70848,18 @@ var landscape = function landscape() {
   });
 };
 
-landscape(); // const landShape = new THREE.Box3();
-// console.log(landShape, 'laaaaand');
-// landShape.setFromCenterAndSize(new THREE.Vector3(15, 15, 15), new THREE.Vector3(1, 1, 1));
-// const landHelper = new THREE.Box3Helper(landShape, '#ffffff');
-// visuals.scene.add(landHelper);
-
+loadLandscape();
 /******/
 
 var physics = new _physics.default();
-(0, _cannonEsDebugger.default)(visuals.scene, physics.world.bodies);
-physics.addBoxGround();
+(0, _cannonEsDebugger.default)(visuals.scene, physics.world.bodies); // physics.addBoxGround();
+
+physics.addPlaneGround(); // const groundShape = new CANNON.Plane();
+// const groundBody = new CANNON.Body({ mass: 0 });
+// groundBody.addShape(groundShape);
+// groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+// physics.world.addBody(groundBody);
+
 /******/
 
 var cylShape = new CANNON.Cylinder(scale * 0.5, scale * 0.5, 1.5080219133341668 * scale, 12);
@@ -70990,7 +70998,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57808" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63013" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

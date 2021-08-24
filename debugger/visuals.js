@@ -78,6 +78,8 @@ export default class Visuals {
     const carMesh = new THREE.Mesh(carGeometry, carMaterial);
     return carMesh;
   }
+
+
   createWheels() {
     const wheels = [];
     for (let i = 0; i < 4; i++) {

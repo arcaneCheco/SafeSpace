@@ -139,10 +139,10 @@ export default class Visuals {
     });
   }
   loadLandscape() {
-    this.gltfLoader.load("/models/3D-landscape/NatureGradientPack1.glb", (gltf) => {
+    this.gltfLoader.load("/models/3D-landscape/NatureGradientPack2.glb", (gltf) => {
       console.log(gltf, 'gltfff');
-      gltf.scene.scale.set(10, 10, 10)
-      gltf.scene.children[6].position.y += 0.1;
+      gltf.scene.scale.set(17, 17, 17)
+      gltf.scene.children[6].position.y += 0.001;
       this.scene.add(gltf.scene);
     },
       function (xhr) {

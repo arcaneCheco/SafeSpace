@@ -12,6 +12,7 @@ export default function threeJsCanvas() {
   const canvas = document.querySelector("#canvas");
   const visuals = new Visuals(canvas);
 
+
   /*
    * Misc
    */

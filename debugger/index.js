@@ -17,7 +17,7 @@ let avatar = null;
 let isLoaded = false;
 // window.addEventListener("resize", visuals.resize);
 // load model
-const scale = 8;
+const scale = 4;
 const loadModel = () => {
   visuals.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
     // cesum man mesh size before scaling:
@@ -38,39 +38,36 @@ const loadModel = () => {
 };
 loadModel();
 
-const landscape = () => {
-  visuals.gltfLoader.load("/models/CesiumMan/3D-landscape/NatureGradientPack1.glb", (gltf) => {
+const loadLandscape = () => {
+  visuals.gltfLoader.load("/models/CesiumMan/3D-landscape/NatureGradientPack2.glb", (gltf) => {
     console.log(gltf, 'gltfff');
-    const dims = new THREE.Box3().setFromObject(gltf.scene);
-    console.log('dimensions:', dims.max.x - dims.min.x, dims.max.y - dims.min.y, dims.max.z - dims.min.z)
-    gltf.scene.scale.set(24, 24, 24)
+    gltf.scene.scale.set(17, 17, 17)
+    gltf.scene.children[6].position.y += 0.001;
     visuals.scene.add(gltf.scene);
   },
     function (xhr) {
       console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-
     },
     function (error) {
       console.log('An error happened');
     }
   );
 }
-landscape();
-
-
-// const landShape = new THREE.Box3();
-// console.log(landShape, 'laaaaand');
-// landShape.setFromCenterAndSize(new THREE.Vector3(15, 15, 15), new THREE.Vector3(1, 1, 1));
-// const landHelper = new THREE.Box3Helper(landShape, '#ffffff');
-// visuals.scene.add(landHelper);
-
+loadLandscape();
 
 
 /******/
 
 const physics = new Physics();
 cannonDebugger(visuals.scene, physics.world.bodies);
-physics.addBoxGround();
+// physics.addBoxGround();
+physics.addPlaneGround();
+
+// const groundShape = new CANNON.Plane();
+// const groundBody = new CANNON.Body({ mass: 0 });
+// groundBody.addShape(groundShape);
+// groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+// physics.world.addBody(groundBody);
 
 /******/
 const cylShape = new CANNON.Cylinder(
