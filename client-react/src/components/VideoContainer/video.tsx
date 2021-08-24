@@ -3,20 +3,20 @@ import "./video.css";
 
 interface Props {
   stream: MediaStream;
-  muted?: boolean;
+  // muted?: boolean;
   opacity: number;
 }
 
-const Video = ({ stream, muted, opacity }: Props) => {
+const Video = ({ stream, opacity }: Props) => {
   const ref = useRef<HTMLVideoElement>(null);
   // const [isMuted, setIsMuted] = useState<boolean>(false);
 
   // const ref = useRef(null);
-  const [isMuted, setIsMuted] = useState(false);
+  // const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     if (ref.current) ref.current.srcObject = stream;
-    if (muted) setIsMuted(muted);
+    // if (muted) setIsMuted(muted);
   }, []);
 
   return (
@@ -25,7 +25,7 @@ const Video = ({ stream, muted, opacity }: Props) => {
         style={{ opacity: opacity }}
         className="videoTileSingle"
         ref={ref}
-        muted={isMuted}
+        muted={false}
         autoPlay
       ></video>
     </div>
