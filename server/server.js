@@ -5,7 +5,7 @@ const physicsSockets = require("./physicsSockets");
 const webrtcsocketlogic = require("./sockets/webrtcSockets");
 const uuidv1 = require('uuid/v1');
 
-const PORT = 3001;
+const PORT = 3003;
 const app = express();
 
 const server = app.listen(PORT, () => {

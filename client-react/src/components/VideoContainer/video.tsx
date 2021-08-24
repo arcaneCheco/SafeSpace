@@ -16,7 +16,7 @@ const Video = ({ stream, opacity }: Props) => {
 
   useEffect(() => {
     if (ref.current) ref.current.srcObject = stream;
-  },[])
+  }, [])
 
   return (
     <div className="videoSingle">
