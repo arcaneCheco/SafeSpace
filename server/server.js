@@ -5,10 +5,10 @@ const physicsSockets = require("./physicsSockets");
 const webrtcsocketlogic = require("./sockets/webrtcSockets");
 const uuidv1 = require("uuid/v1");
 
-const PORT = 3001;
+const PORT = 3003;
 const app = express();
 
-const server = app.listen(process.env.PORT || 3001, () => {
+const server = app.listen(process.env.PORT || 3003, () => {
   try {
     console.log(`server running at http://localhost:${PORT}`);
   } catch (err) {
