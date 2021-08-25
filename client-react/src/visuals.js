@@ -32,7 +32,7 @@ export default class Visuals {
       this.far
     );
     console.log(this.scene);
-    this.orbitControls = new OrbitControls(this.camera, this.canvas);
+    // this.orbitControls = new OrbitControls(this.camera, this.canvas);
     // this.orbitControls.enableDamping = true;
     this.renderer = new THREE.WebGLRenderer({ canvas });
     this.configRenderer();
