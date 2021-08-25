@@ -118,14 +118,13 @@ export default class Visuals {
       this.hasEnteredBuffer = true;
       setTimeout(() => {
         this.hasEntered = true;
-      }, 50);
+      }, 150);
       this.updateThirdPersonViewPerspective();
       this.scene.remove(this.welcomeLights);
       gsap.to(this.scene.getObjectByName("sunLight"), {
         duration: 5,
         intensity: 3,
       });
-
     }
   }
   setWelcomeLight() {
@@ -227,9 +226,13 @@ export default class Visuals {
         this.userMeshes[userId] = this.avatar.mesh;
       } else {
         this.userMeshes[userId] = SkeletonUtils.clone(this.avatar.mesh);
-        this.userMeshes[userId].mixer = new THREE.AnimationMixer(this.userMeshes[userId]);
+        this.userMeshes[userId].mixer = new THREE.AnimationMixer(
+          this.userMeshes[userId]
+        );
         this.userMeshes[userId].mixer.timeScale = 2;
-        this.userMeshes[userId].action = this.userMeshes[userId].mixer.clipAction(this.avatarAnimation)
+        this.userMeshes[userId].action = this.userMeshes[
+          userId
+        ].mixer.clipAction(this.avatarAnimation);
         this.userMeshes[userId].action.play();
       }
       this.userMeshes[userId].name = userData.username;
@@ -284,14 +287,16 @@ export default class Visuals {
   }
 
   addNewUser(id, userData) {
-    let clone = SkeletonUtils.clone(this.avatar.mesh)
+    let clone = SkeletonUtils.clone(this.avatar.mesh);
     this.userMeshes[id] = clone;
     this.scene.add(clone);
     this.userMeshes[id].name = userData.username;
     this.userMeshes[id].position.copy(userData.position);
     this.userMeshes[id].mixer = new THREE.AnimationMixer(clone);
     this.userMeshes[id].mixer.timeScale = 2;
-    this.userMeshes[id].action = this.userMeshes[id].mixer.clipAction(this.avatarAnimation)
+    this.userMeshes[id].action = this.userMeshes[id].mixer.clipAction(
+      this.avatarAnimation
+    );
     this.userMeshes[id].action.play();
   }
 
