@@ -29,7 +29,7 @@ export default function threeJsCanvas() {
   /**
    * establish socket connection
    */
-  const socket = io("http://localhost:3001/physicsNamespace");
+  const socket = io("http://localhost:3003/physicsNamespace");
   // const socket = io("https://6519-82-163-118-2.ngrok.io/physicsNamespace");
 
   socket.on("connect", () => {

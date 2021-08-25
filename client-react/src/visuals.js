@@ -78,7 +78,7 @@ export default class Visuals {
     let isIntersected = this.raycaster.intersectObject(this.enterText);
     if (isIntersected.length > 0) {
       console.log("Mesh clicked!");
-      // this.hasEntered = true;
+      this.hasEntered = true;
       // this.scene.
     }
   }
