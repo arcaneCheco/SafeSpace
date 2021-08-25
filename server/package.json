@@ -23,9 +23,7 @@
     "webrtc": "^1.14.1",
     "wrtc": "^0.4.7"
   },
-  "buildpacks": [
-    {
-      "url": "https://github.com/stomita/heroku-buildpack-phantomjs"
-    }
-  ]
+  "engines": {
+    "node": "16.5.0"
+  }
 }
