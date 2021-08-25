@@ -22,5 +22,10 @@
     "uuid": "^3.4.0",
     "webrtc": "^1.14.1",
     "wrtc": "^0.4.7"
-  }
+  },
+  "buildpacks": [
+    {
+      "url": "https://github.com/stomita/heroku-buildpack-phantomjs"
+    }
+  ]
 }
