@@ -12,7 +12,7 @@ export default class Visuals {
     this.userMeshes = {};
     this.avatar = {};
     this.avatarAnimation = {};
-    this.mixers = [];
+    this.mixers = {};
     this.userId = "";
     this.map = {};
     this.sizes = {
@@ -78,8 +78,14 @@ export default class Visuals {
     for (const [userId, userData] of Object.entries(activeUsers)) {
       if (userId === this.userId) {
         this.userMeshes[userId] = this.avatar.mesh;
+        console.log('here', this.userMeshes[userId])
       } else {
         this.userMeshes[userId] = SkeletonUtils.clone(this.avatar.mesh);
+        this.userMeshes[userId].mixer = new THREE.AnimationMixer(this.userMeshes[userId]);
+        this.userMeshes[userId].action = this.userMeshes[userId].mixer.clipAction(this.avatarAnimation)
+        this.userMeshes[userId].action.play();
+        // this.userMeshes[userId].mixer = this.avatar.mixer;
+        console.log('not here ', this.userMeshes[userId])
       }
       this.userMeshes[userId].name = userData.username;
       this.userMeshes[userId].position.copy(userData.position);
@@ -117,19 +123,21 @@ export default class Visuals {
       if (this.userMeshes[userId]) {
         this.userMeshes[userId].position.copy(userData.position);
         this.userMeshes[userId].quaternion.copy(userData.quaternion);
+        this.userMeshes[userId].animationStatus = userData.animationStatus;
+        // add animation status and loop through visuals.usermeshes
         // this.userMeshes[userId].mixer.update();
         // console.log('here', this.userMeshes[userId])
       }
     }
   }
 
-  updateAnimationStates(activeUsers, deltaTime) {
-    for (const [userId, userData] of Object.entries(activeUsers)) {
-      if (this.userMeshes[userId]) {
-        this.userMeshes[userId].mixer.update(deltaTime);
-      }
-    }
-  }
+  // updateAnimationStates(activeUsers, deltaTime) {
+  //   for (const [userId, userData] of Object.entries(activeUsers)) {
+  //     if (this.userMeshes[userId]) {
+  //       this.userMeshes[userId].mixer.update(deltaTime);
+  //     }
+  //   }
+  // }
   // updateThirdPersonViewPerspective()
   // updateThirdPersonViewPerspective() {
   //   if (this.userMeshes[this.userId]) {
@@ -157,8 +165,6 @@ export default class Visuals {
     this.userMeshes[id].mixer = new THREE.AnimationMixer(clone);
     this.userMeshes[id].action = this.userMeshes[id].mixer.clipAction(this.avatarAnimation)
     this.userMeshes[id].action.play();
-    this.mixers.push(this.userMeshes[id]);
-    console.log(this.mixers)
   }
 
   loadAvatar() {
@@ -166,13 +172,12 @@ export default class Visuals {
       this.avatarAnimation = gltf.animations[0];
       this.avatar.mesh = gltf.scene.children[0];
       this.avatar.mixer = new THREE.AnimationMixer(gltf.scene);
+      this.avatar.mesh.mixer = this.avatar.mixer;
       this.avatar.action = this.avatar.mixer.clipAction(this.avatarAnimation);
       this.avatar.mesh.scale.set(4, 4, 4);
       this.avatar.mesh.rotateZ(Math.PI);
       this.avatar.action.play();
       this.avatar.isLoaded = true;
-      this.mixers.push(this.avatar);
-      console.log(this.mixers)
     });
   }
   configRenderer() {

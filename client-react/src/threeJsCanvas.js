@@ -99,16 +99,18 @@ export default function threeJsCanvas() {
     visuals.updateThirdPersonViewPerspective();
 
     // udpate animation
-    if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
-      visuals.avatar.mixer.update(deltaTime);
+    // if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
+      // visuals.avatar.mixer.update(deltaTime);
       // console.log(visuals.avatar.mixer)
+    // }
+
+    for (const [key, value] of Object.entries(visuals.userMeshes)) {
+      if (value.animationStatus === 'walking') {
+        console.log(visuals.userMeshes)
+        value.mixer &&
+        value.mixer.update(deltaTime)
+      }
     }
-
-
-    visuals.mixers.forEach(mixer => {
-      mixer.mixer.update(deltaTime)
-      // console.log(mixer)
-    })
 
     // Render
     visuals.renderer.render(visuals.scene, visuals.camera);
