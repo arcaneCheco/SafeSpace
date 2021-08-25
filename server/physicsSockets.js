@@ -60,6 +60,7 @@ module.exports = (io) => {
       rotation: { x: 0, y: 0, y: 0 },
       quaternion: { x: 0, y: 0, z: 0, w: 0 },
       connectionGradients: {},
+      animationStatus: 'stationary',
     };
     activeUsers[socket.id].bodyId = physics.createAndAddCylAvatar(socket.id);
     // console.log("physics users:", activeUsers);
@@ -167,6 +168,7 @@ module.exports = (io) => {
             //   directionVector,
             //   new CANNON.Vec3(0, 0, 0)
             // );
+            activeUsers[socket.id].animationStatus = 'walking';
             physics.userBodies[socket.id].position.x += directionVector.x;
             physics.userBodies[socket.id].position.z += directionVector.z;
             physics.userBodies[socket.id].wakeUp();
@@ -179,6 +181,8 @@ module.exports = (io) => {
                 "new distances",
                 updateConnectionGradients(distances[socket.id])
               );
+          } else {
+            activeUsers[socket.id].animationStatus = 'stationary';
           }
         }
       }

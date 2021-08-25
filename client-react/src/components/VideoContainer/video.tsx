@@ -3,7 +3,6 @@ import "./video.css";
 
 interface Props {
   stream: MediaStream;
-  // muted?: boolean;
   opacity: number;
 }
 
@@ -16,7 +15,7 @@ const Video = ({ stream, opacity }: Props) => {
 
   useEffect(() => {
     if (ref.current) ref.current.srcObject = stream;
-  }, [])
+  }, []);
 
   return (
     <div className="videoSingle">
