@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "cannon-es": "0.x.x",
+    "cannon-es-debugger": "^0.1.4",
+    "three": "^0.131.3",
+    "typescript": ">=3.8"
+  }
+}

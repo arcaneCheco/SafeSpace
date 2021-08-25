@@ -1,0 +1,12 @@
+.videoSingle {
+  margin: 10px;
+  border-radius: 50%;
+  height: 200px;
+  width: 200px;
+  overflow: hidden;
+}
+
+.videoTileSingle {
+  width: 100%;
+  height: 100%;
+}
