@@ -1,10 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { GUI } from "three/examples/jsm/libs/dat.gui.module";
+// import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { SkeletonUtils } from "three/examples/jsm/utils/SkeletonUtils";
-import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 import gsap from "gsap";
 
 export default class Visuals {
@@ -18,6 +17,7 @@ export default class Visuals {
     this.userId = "";
     this.map = {};
     this.hasEntered = false;
+    this.hasEnteredBuffer = false;
     this.sizes = {
       width: window.innerWidth,
       height: window.innerHeight,
@@ -31,8 +31,9 @@ export default class Visuals {
       this.near,
       this.far
     );
+    console.log(this.scene);
     this.orbitControls = new OrbitControls(this.camera, this.canvas);
-    this.orbitControls.enableDamping = true;
+    // this.orbitControls.enableDamping = true;
     this.renderer = new THREE.WebGLRenderer({ canvas });
     this.configRenderer();
     // this.createGround();
@@ -45,15 +46,14 @@ export default class Visuals {
     this.cameraIsInitialized = false;
     window.addEventListener("resize", () => this.resize());
     document.onkeydown = document.onkeyup = (e) => this.keyboardControls(e);
-    this.gui = new GUI();
-    this.addGUIcontrol();
     ///welcome screen stuff
     this.raycaster = new THREE.Raycaster();
     this.fontLoader = new THREE.FontLoader();
     this.welcomeLights = new THREE.Group();
     this.welcomeText = new THREE.Group();
-    this.welcomeText.rotateX(-Math.PI / 4);
-    this.welcomeText.position.set(0, 75, 25);
+    this.welcomeText.rotateX(Math.PI / 6);
+    // this.welcomeText.rotateY(Math.PI / 18);
+    this.welcomeText.position.set(0, 185, 350);
     this.scene.add(this.welcomeLights, this.welcomeText);
     this.mouse = new THREE.Vector2();
     this.enterText = null;
@@ -64,23 +64,122 @@ export default class Visuals {
     window.addEventListener("click", this.enterClickHandler.bind(this), false);
     this.createWelcomeScreen();
     ////////
+    this.otherFogStuff();
+    this.addSun();
+  }
+  otherFogStuff() {
+    this.scene.background = new THREE.Color(0xe899ca);
+    this.scene.fog = new THREE.Fog(0xc5945f, 1, 600);
+  }
+  welcomeAnimation(elapsedTime) {
+    if (this.enterText) {
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      const intersect = this.raycaster.intersectObject(this.enterText);
+      if (this.scene.getObjectByName("welcomeRectLight")) {
+        if (intersect.length > 0) {
+          gsap.to(this.scene.getObjectByName("welcomeRectLight"), {
+            duration: 2,
+            intensity: 10,
+          });
+        } else {
+          gsap.to(this.scene.getObjectByName("welcomeRectLight"), {
+            duration: 2,
+            intensity: 0,
+          });
+        }
+      }
+      this.welcomeText.rotation.z =
+        Math.sin(Math.PI * elapsedTime * 0.25) * 0.075;
+      this.welcomeText.rotation.y =
+        Math.sin(Math.PI * elapsedTime * 0.1) * 0.075;
+      if (this.hasEnteredBuffer) {
+        this.camera.position.x = Math.sin(this.mouse.x * 0.5 * Math.PI) * 3 + 0;
+        this.camera.position.z =
+          Math.cos(this.mouse.x * 0.5 * Math.PI) * 3 + 370;
+        this.camera.position.y = this.mouse.y * 1 + 165;
+      }
+    }
   }
   createWelcomeScreen() {
-    this.camera.position.set(0, 100, 50);
+    this.camera.rotation.set(Math.PI / 6, 0, 0);
+    this.camera.position.set(0, 165, 370);
+    this.camera.updateProjectionMatrix();
     this.setWelcomeLight();
-    this.createText("Welcome", 2, 0, -5);
-    this.createText("to", 2, -5, -4);
-    this.createText("SafeSpace", 4, -10, -3);
-    this.createText("Enter", 2, -15, 0);
+    this.createText("Welcome to", 1.5, 0, 0);
+    this.createText("Safe Space", 4, -8, 0);
+    this.createText("Enter", 3, -18, 0);
   }
   enterClickHandler() {
     this.raycaster.setFromCamera(this.mouse, this.camera);
     let isIntersected = this.raycaster.intersectObject(this.enterText);
     if (isIntersected.length > 0) {
       console.log("Mesh clicked!");
-      this.hasEntered = true;
-      // this.scene.
+
+      this.hasEnteredBuffer = true;
+      setTimeout(() => {
+        this.hasEntered = true;
+      }, 50);
+      this.updateThirdPersonViewPerspective();
+      this.scene.remove(this.welcomeLights);
+      gsap.to(this.scene.getObjectByName("sunLight"), {
+        duration: 5,
+        intensity: 3,
+      });
+
     }
+  }
+  setWelcomeLight() {
+    const pointLight = new THREE.PointLight(0xa8d8b9);
+    pointLight.position.set(28, 188, 359);
+    pointLight.intensity = 3;
+    pointLight.name = "welcomePointLight";
+    this.welcomeLights.add(pointLight);
+    const rectLight = new THREE.RectAreaLight(0xf05e1c, 5, 30, 30);
+    rectLight.name = "welcomeRectLight";
+    rectLight.position.set(0, 160, 365);
+    rectLight.lookAt(new THREE.Vector3(0, 185, 350));
+    this.welcomeLights.add(rectLight);
+  }
+  initializeCamera() {
+    this.goal = new THREE.Object3D();
+    // this.goal.add(this.userMeshes[this.userId]);
+    this.userMeshes[this.userId].add(this.goal);
+    this.goal.position.set(0.5, 6, 3);
+    this.temp = new THREE.Vector3();
+  }
+  updateThirdPersonViewPerspective() {
+    if (!this.carmeraIsInitialized) {
+      if (this.userMeshes[this.userId]) {
+        this.initializeCamera();
+        this.carmeraIsInitialized = true;
+      } else {
+        return;
+      }
+    } else {
+      this.temp.setFromMatrixPosition(this.goal.matrixWorld);
+      this.camera.position.lerp(this.temp, 0.2);
+      this.camera.lookAt(this.userMeshes[this.userId].position);
+    }
+  }
+  addSun() {
+    const pointLight = new THREE.SpotLight(0xe17539);
+    pointLight.position.set(890, 755, 890);
+    pointLight.name = "sunLight";
+    pointLight.castShadow = true;
+    pointLight.shadow.mapSize.width = 1024; // default
+    pointLight.shadow.mapSize.height = 1024; // default
+    pointLight.shadow.camera.near = 1000; // default
+    pointLight.shadow.camera.far = 2000; // default
+    pointLight.intensity = 0;
+    pointLight.angle = 0.286;
+    pointLight.penumbra = 1;
+    this.scene.add(pointLight);
+  }
+  addAmbientLight() {
+    const ambientLight = new THREE.AmbientLight();
+    ambientLight.name = "ambientLight";
+    ambientLight.intensity = 0;
+    this.scene.add(ambientLight);
   }
   createText(text, size, offsetY, offsetZ) {
     this.fontLoader.load("/fonts/ArkitechStencil_Regular.json", (font) => {
@@ -104,48 +203,9 @@ export default class Visuals {
       this.welcomeText.add(textMesh);
       if (text === "Enter") {
         this.enterText = textMesh;
+        // this.enterText.material.emissive = new THREE.Color(0xff0000);
       }
     });
-  }
-  setWelcomeLight() {
-    const pointLight = new THREE.PointLight(0xddd23b);
-    const pointLightHelper = new THREE.PointLightHelper(pointLight);
-    pointLight.position.set(0, 25, 0);
-    pointLight.intensity = 3;
-    this.welcomeLights.add(pointLight, pointLightHelper);
-    const rectLight = new THREE.RectAreaLight(0x51a8dd, 2, 10, 10);
-    rectLight.position.set(5, 5, 0);
-    rectLight.lookAt(0, 0, 0);
-    const rectLightHelper = new RectAreaLightHelper(rectLight);
-    this.welcomeLights.add(rectLight, rectLightHelper);
-    this.gui.add(rectLight, "intensity").min(0.1).max(10).step(0.001);
-  }
-  addGUIcontrol() {
-    this.gui.add(this.camera.position, "x").min(-50).max(50).step(0.1);
-    this.gui.add(this.camera.position, "y").min(-50).max(250).step(0.1);
-    this.gui.add(this.camera.position, "z").min(-50).max(50).step(0.1);
-  }
-  // updateThirdPersonViewPerspective()
-  initializeCamera() {
-    this.goal = new THREE.Object3D();
-    // this.goal.add(this.userMeshes[this.userId]);
-    this.userMeshes[this.userId].add(this.goal);
-    this.goal.position.set(0.5, 6, 3);
-    this.temp = new THREE.Vector3();
-  }
-  updateThirdPersonViewPerspective() {
-    if (!this.carmeraIsInitialized) {
-      if (this.userMeshes[this.userId]) {
-        this.initializeCamera();
-        this.carmeraIsInitialized = true;
-      } else {
-        return;
-      }
-    } else {
-      this.temp.setFromMatrixPosition(this.goal.matrixWorld);
-      this.camera.position.lerp(this.temp, 0.2);
-      this.camera.lookAt(this.userMeshes[this.userId].position);
-    }
   }
   updateAvatarModeCamera(target) {
     let offset = new THREE.Vector3(
@@ -155,6 +215,10 @@ export default class Visuals {
     );
     this.camera.position.copy(offset);
     this.camera.lookAt(target.position);
+  }
+  addGridHelper() {
+    const helper = new THREE.GridHelper();
+    this.scene.add(helper);
   }
   joiningUser(id, activeUsers) {
     this.userId = id;
@@ -185,7 +249,6 @@ export default class Visuals {
       e.key === "ArrowLeft"
     )
       this.map[e.key] = e.type === "keydown";
-    // console.log(this.map);
   }
   resize() {
     // Update sizes
@@ -210,22 +273,6 @@ export default class Visuals {
       }
     }
   }
-
-  // updateAnimationStates(activeUsers, deltaTime) {
-  //   for (const [userId, userData] of Object.entries(activeUsers)) {
-  //     if (this.userMeshes[userId]) {
-  //       this.userMeshes[userId].mixer.update(deltaTime);
-  //     }
-  //   }
-  // }
-  // updateThirdPersonViewPerspective()
-  // updateThirdPersonViewPerspective() {
-  //   if (this.userMeshes[this.userId]) {
-  //     this.temp.setFromMatrixPosition(this.goal.matrixWorld);
-  //     this.camera.position.lerp(this.temp, 0.2);
-  //     this.camera.lookAt(this.userMeshes[this.userId].position);
-  //   }
-  // }
   updateAvatarModeCamera(target) {
     let offset = new THREE.Vector3(
       target.position.x + 2,
@@ -264,18 +311,19 @@ export default class Visuals {
   }
   loadLandscape() {
     this.gltfLoader.load(
-      "/models/3D-landscape/NatureGradientPack2.glb",
+      "/models/3D-landscape/NatureGradientPack1.glb",
       (gltf) => {
         console.log(gltf, "gltfff");
+        gltf.scene.children.forEach((childObj) => {
+          childObj.name !== "Plane" && (childObj.castShadow = true);
+        });
+        gltf.scene.castShadow = true;
+        gltf.scene.children[6].receiveShadow = true;
         gltf.scene.scale.set(17, 17, 17);
+        gltf.scene.children[6].scale.set(100, 100, 100);
         gltf.scene.children[6].position.y += 0.001;
+        gltf.scene.children[6].material.roughness = 1;
         this.scene.add(gltf.scene);
-      },
-      function (xhr) {
-        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-      },
-      function (error) {
-        console.log("An error happened");
       }
     );
   }
