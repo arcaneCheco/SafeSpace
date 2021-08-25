@@ -40,6 +40,8 @@ const Signalling: React.FC = () => {
 
   useEffect(() => {
     let newSocket = io("http://localhost:3003/webRTCNamespace");
+    // let newSocket = io("https://6519-82-163-118-2.ngrok.io/webRTCNamespace");
+
     let localStream: MediaStream;
 
     newSocket.on("connection", () => {
@@ -338,9 +340,9 @@ const Signalling: React.FC = () => {
         <div className="videoBox">
           <video
             className="videoTile"
+            muted={true}
             ref={localVideoRef}
             autoPlay
-            muted={true}
           ></video>
         </div>
       </div>
