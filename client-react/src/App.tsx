@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import threeJsCanvas from "./threeJsCanvas";
-import Signalling from "./components/VideoContainer/signalling";
-import WelcomePage from "./welcomePage";
+// import Signalling from "./components/VideoContainer/signalling";
+// import WelcomePage from "./welcomePage";
 
 const App = () => {
   useEffect(() => {
