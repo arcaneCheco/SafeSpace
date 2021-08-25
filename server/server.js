@@ -8,7 +8,7 @@ const uuidv1 = require("uuid/v1");
 const PORT = 3001;
 const app = express();
 
-const server = app.listen(PORT, () => {
+const server = app.listen((process.env.PORT || 3003), () => {
   try {
     console.log(`server running at http://localhost:${PORT}`);
   } catch (err) {

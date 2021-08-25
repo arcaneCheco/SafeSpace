@@ -23,7 +23,9 @@ export default function threeJsCanvas() {
   /**
    * establish socket connection
    */
-  const socket = io("http://localhost:3001/physicsNamespace");
+
+  // const socket = io("http://localhost:3003/physicsNamespace");
+  const socket = io("https://safe-space-webrtc.herokuapp.com/physicsNamespace");
 
   socket.on("connect", () => {
     console.log("Welcome to Safe Space");
@@ -85,8 +87,17 @@ export default function threeJsCanvas() {
     visuals.hasEntered && visuals.updateThirdPersonViewPerspective();
 
     // udpate animation
-    if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
-      visuals.avatar.mixer.update(deltaTime);
+    // if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
+      // visuals.avatar.mixer.update(deltaTime);
+      // console.log(visuals.avatar.mixer)
+    // }
+
+    for (const [key, value] of Object.entries(visuals.userMeshes)) {
+      if (value.animationStatus === 'walking') {
+        console.log(visuals.userMeshes)
+        value.mixer &&
+        value.mixer.update(deltaTime)
+      }
     }
 
     // Render

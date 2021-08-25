@@ -12,6 +12,8 @@ export default class Visuals {
     this.scene = new THREE.Scene();
     this.userMeshes = {};
     this.avatar = {};
+    this.avatarAnimation = {};
+    this.mixers = {};
     this.userId = "";
     this.map = {};
     this.hasEntered = false;
@@ -112,6 +114,7 @@ export default class Visuals {
     let isIntersected = this.raycaster.intersectObject(this.enterText);
     if (isIntersected.length > 0) {
       console.log("Mesh clicked!");
+
       this.hasEnteredBuffer = true;
       setTimeout(() => {
         this.hasEntered = true;
@@ -122,6 +125,7 @@ export default class Visuals {
         duration: 5,
         intensity: 3,
       });
+
     }
   }
   setWelcomeLight() {
@@ -223,6 +227,10 @@ export default class Visuals {
         this.userMeshes[userId] = this.avatar.mesh;
       } else {
         this.userMeshes[userId] = SkeletonUtils.clone(this.avatar.mesh);
+        this.userMeshes[userId].mixer = new THREE.AnimationMixer(this.userMeshes[userId]);
+        this.userMeshes[userId].mixer.timeScale = 2;
+        this.userMeshes[userId].action = this.userMeshes[userId].mixer.clipAction(this.avatarAnimation)
+        this.userMeshes[userId].action.play();
       }
       this.userMeshes[userId].name = userData.username;
       this.userMeshes[userId].position.copy(userData.position);
@@ -258,22 +266,43 @@ export default class Visuals {
       if (this.userMeshes[userId]) {
         this.userMeshes[userId].position.copy(userData.position);
         this.userMeshes[userId].quaternion.copy(userData.quaternion);
+        this.userMeshes[userId].animationStatus = userData.animationStatus;
+        // add animation status and loop through visuals.usermeshes
+        // this.userMeshes[userId].mixer.update();
+        // console.log('here', this.userMeshes[userId])
       }
     }
   }
+  updateAvatarModeCamera(target) {
+    let offset = new THREE.Vector3(
+      target.position.x + 2,
+      target.position.y + 20,
+      target.position.z + 20
+    );
+    this.camera.position.copy(offset);
+    this.camera.lookAt(target.position);
+  }
 
   addNewUser(id, userData) {
-    const newMesh = SkeletonUtils.clone(this.avatar.mesh);
-    this.userMeshes[id] = SkeletonUtils.clone(this.avatar.mesh);
+    let clone = SkeletonUtils.clone(this.avatar.mesh)
+    this.userMeshes[id] = clone;
+    this.scene.add(clone);
     this.userMeshes[id].name = userData.username;
     this.userMeshes[id].position.copy(userData.position);
-    this.scene.add(this.userMeshes[id]);
+    this.userMeshes[id].mixer = new THREE.AnimationMixer(clone);
+    this.userMeshes[id].mixer.timeScale = 2;
+    this.userMeshes[id].action = this.userMeshes[id].mixer.clipAction(this.avatarAnimation)
+    this.userMeshes[id].action.play();
   }
+
   loadAvatar() {
     this.gltfLoader.load("/models/CesiumMan/CesiumMan.gltf", (gltf) => {
+      this.avatarAnimation = gltf.animations[0];
       this.avatar.mesh = gltf.scene.children[0];
       this.avatar.mixer = new THREE.AnimationMixer(gltf.scene);
-      this.avatar.action = this.avatar.mixer.clipAction(gltf.animations[0]);
+      this.avatar.mixer.timeScale = 2;
+      this.avatar.mesh.mixer = this.avatar.mixer;
+      this.avatar.action = this.avatar.mixer.clipAction(this.avatarAnimation);
       this.avatar.mesh.scale.set(4, 4, 4);
       this.avatar.mesh.rotateZ(Math.PI);
       this.avatar.action.play();
