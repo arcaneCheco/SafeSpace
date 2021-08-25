@@ -92,7 +92,7 @@ export default class Visuals {
         Math.sin(Math.PI * elapsedTime * 0.25) * 0.075;
       this.welcomeText.rotation.y =
         Math.sin(Math.PI * elapsedTime * 0.1) * 0.075;
-      if (this.hasEnteredBuffer) {
+      if (!this.hasEnteredBuffer) {
         this.camera.position.x = Math.sin(this.mouse.x * 0.5 * Math.PI) * 3 + 0;
         this.camera.position.z =
           Math.cos(this.mouse.x * 0.5 * Math.PI) * 3 + 370;
