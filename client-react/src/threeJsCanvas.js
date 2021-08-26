@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { GUI } from "three/examples/jsm/libs/dat.gui.module";
 import useStore from "./store";
 import { io } from "socket.io-client";
 import Visuals from "./visuals";
@@ -20,17 +19,14 @@ export default function threeJsCanvas() {
     sphereUserControl: true,
     carControl: false,
   };
-  const gui = new GUI();
-  const helper = new THREE.GridHelper();
-  visuals.scene.add(helper);
-  const ambientLight = new THREE.AmbientLight();
-  visuals.scene.add(ambientLight);
 
   /**
    * establish socket connection
    */
+
   // const socket = io("http://localhost:3003/physicsNamespace");
   const socket = io("https://safe-space-webrtc.herokuapp.com/physicsNamespace");
+
 
   socket.on("connect", () => {
     console.log("Welcome to Safe Space");
@@ -86,27 +82,31 @@ export default function threeJsCanvas() {
     //
 
     // Update controls
-    visuals.orbitControls.update();
+    // visuals.orbitControls.update();
 
     // update camera
     visuals.hasEntered && visuals.updateThirdPersonViewPerspective();
 
     // udpate animation
     // if (isLoaded && (visuals.map.ArrowUp || visuals.map.ArrowDown)) {
-      // visuals.avatar.mixer.update(deltaTime);
-      // console.log(visuals.avatar.mixer)
+    // visuals.avatar.mixer.update(deltaTime);
+    // console.log(visuals.avatar.mixer)
     // }
 
     for (const [key, value] of Object.entries(visuals.userMeshes)) {
-      if (value.animationStatus === 'walking') {
-        console.log(visuals.userMeshes)
-        value.mixer &&
-        value.mixer.update(deltaTime)
+      if (value.animationStatus === "walking") {
+        value.mixer && value.mixer.update(deltaTime);
       }
     }
 
     // Render
     visuals.renderer.render(visuals.scene, visuals.camera);
+
+    if (!visuals.hasEntered) {
+      visuals.welcomeAnimation(elapsedTime);
+    }
+
+    visuals.animateLogos(elapsedTime);
 
     // Retrieve users distances for connectionGradients
     // console.log(users)
