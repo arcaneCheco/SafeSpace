@@ -105,6 +105,8 @@ export default function threeJsCanvas() {
       visuals.welcomeAnimation(elapsedTime);
     }
 
+    visuals.animateLogos(elapsedTime);
+
     // Retrieve users distances for connectionGradients
     // console.log(users)
 

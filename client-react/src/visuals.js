@@ -66,6 +66,37 @@ export default class Visuals {
     ////////
     this.otherFogStuff();
     this.addSun();
+    this.logos = new THREE.Group();
+    this.logos.position.set(-130, 5, -130);
+    this.scene.add(this.logos);
+    this.loadLogo("react.png", 0, 0, 0);
+    this.loadLogo("socketIO.png", 12, 0, -8);
+    this.loadLogo("three.png", 24, 0, -16);
+    this.loadLogo("cannon.png", 36, 0, -24);
+    this.loadLogo("blender.png", -48, 0, -32);
+    this.loadLogo("webrtc.png", -12, 0, 8);
+    this.loadLogo("zustand.png", -24, 0, 16);
+    this.loadLogo("typescript.png", -36, 0, 24);
+    console.log(this.logos);
+  }
+  animateLogos(elpasedTime) {
+    let children = this.logos.children;
+    for (let i = 0; i < children.length; i++) {
+      children[i].rotation.y += 0.05;
+      children[i].position.y = Math.abs(Math.sin(elpasedTime * i)) * 3;
+    }
+  }
+  loadLogo(path, offsetX, offsetY, offsetZ) {
+    const texture = this.textureLoader.load(`/textures/logos/${path}`);
+    const logo = new THREE.Mesh(
+      new THREE.PlaneGeometry(10, 10),
+      new THREE.MeshStandardMaterial()
+    );
+    logo.material.map = texture;
+    logo.position.set(offsetX, offsetY, offsetZ);
+    logo.material.side = THREE.DoubleSide;
+    logo.material.transparent = true;
+    this.logos.add(logo);
   }
   otherFogStuff() {
     this.scene.background = new THREE.Color(0xe899ca);
