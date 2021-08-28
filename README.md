@@ -88,7 +88,7 @@ npm start
 
 😬 Mari Shibata - [Github](https://github.com/marishibata) - [LinkedIn](https://www.linkedin.com/in/shibatamari/)
 
-😬 Sergio Azizi - [Github](ttps://github.com/arcaneCheco) - [LinkedIn](https://www.linkedin.com/in/sergio-azizi/)
+😬 Sergio Azizi - [Github](https://github.com/arcaneCheco) - [LinkedIn](https://www.linkedin.com/in/sergio-azizi/)
 
 😬 Daniel Slattery - [Github](https://github.com/Daniel-Slattery) - [LinkedIn](https://www.linkedin.com/in/daniel-s-dev/)
 
