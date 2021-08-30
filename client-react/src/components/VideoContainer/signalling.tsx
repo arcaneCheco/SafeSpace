@@ -27,14 +27,19 @@ const Signalling: React.FC = () => {
   // RTCPeerConnection setting to STUN Server
   const pc_config = {
     iceServers: [
-      // {
-      //   urls: 'stun:[STUN_IP]:[PORT]',
-      //   'credentials': '[YOR CREDENTIALS]',
-      //   'username': '[USERNAME]'
-      // },
       {
-        urls: "stun:stun.l.google.com:19302",
+        urls: 'stun:numb.viagenie.ca:3478',
+        username: 'dr.danielslattery@gmail.com',
+        credentials: 'Dan13lstun',
       },
+      // {
+      //   urls: 'turn:numb.viagenie.ca:3478',
+      //   username: 'dr.danielslattery@gmail.com',
+      //   credentials: 'Dan13lstun',
+      // }
+      // {
+      //   urls: "stun:stun.l.google.com:19302",
+      // },
     ],
   };
 
