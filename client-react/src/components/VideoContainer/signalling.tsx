@@ -40,7 +40,7 @@ const Signalling: React.FC = () => {
 
   useEffect(() => {
     // let newSocket = io("http://localhost:3003/webRTCNamespace");
-    let newSocket = io("https://safe-space-webrtc.herokuapp.com//webRTCNamespace");
+    let newSocket = io("https://safe-space-324109.ew.r.appspot.com/webRTCNamespace");
 
     let localStream: MediaStream;
 

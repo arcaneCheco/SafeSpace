@@ -25,7 +25,7 @@ export default function threeJsCanvas() {
    */
 
   // const socket = io("http://localhost:3003/physicsNamespace");
-  const socket = io("https://safe-space-webrtc.herokuapp.com/physicsNamespace");
+  const socket = io("https://safe-space-324109.ew.r.appspot.com/physicsNamespace");
 
 
   socket.on("connect", () => {
