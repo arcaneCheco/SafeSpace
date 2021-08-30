@@ -27,25 +27,25 @@ const Signalling: React.FC = () => {
   // RTCPeerConnection setting to STUN Server
   const pc_config = {
     iceServers: [
-      {
-        urls: 'stun:numb.viagenie.ca:3478',
-        username: 'dr.danielslattery@gmail.com',
-        credentials: 'Dan13lstun',
-      },
+      // {
+      //   urls: 'stun:numb.viagenie.ca:3478',
+      //   username: 'dr.danielslattery@gmail.com',
+      //   credentials: 'Dan13lstun',
+      // },
       // {
       //   urls: 'turn:numb.viagenie.ca:3478',
       //   username: 'dr.danielslattery@gmail.com',
       //   credentials: 'Dan13lstun',
       // }
-      // {
-      //   urls: "stun:stun.l.google.com:19302",
-      // },
+      {
+        urls: "stun:stun.l.google.com:19302",
+      },
     ],
   };
 
   useEffect(() => {
     // let newSocket = io("http://localhost:3003/webRTCNamespace");
-    let newSocket = io("https://safe-space-webrtc.herokuapp.com//webRTCNamespace");
+    let newSocket = io("https://safe-space-324109.ew.r.appspot.com/webRTCNamespace");
 
     let localStream: MediaStream;
 
