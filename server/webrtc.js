@@ -23,8 +23,6 @@ class WebRTCFuncs {
      }]
     }
 
-    console.log(this.pc_config)
-
     this.receiverPCs = {}; // Saves RTCPeerConnection to receive MediaStream of connected user
     this.senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of another user except yourself
     this.users = {}; // Save MediaStream received via RTCPeerConnection connected from receiverPCs with user's socketID - SAME AS ACTIVE USERS?
