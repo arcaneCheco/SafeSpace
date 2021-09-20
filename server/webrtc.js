@@ -7,17 +7,22 @@ class WebRTCFuncs {
     /******** WebRTC STUN SERVER *********/
 
     this.pc_config = {
-      "iceServers": [
-        // {
-        //   urls: 'stun:[STUN_IP]:[PORT]',
-        //   'credentials': '[YOR CREDENTIALS]',
-        //   'username': '[USERNAME]'
-        // },
-        {
-          urls: 'stun:stun.l.google.com:19302'
-        }
-      ]
+      iceServers: [{
+        urls: [ "stun:eu-turn1.xirsys.com" ]
+     }, {
+        username: "K63qUuUutYyap4qtVEK1TSn6zSmWSp-CKetNMcGrveRqA4sp399-HKGw8Q_JCaUQAAAAAGB91kRBbHBoYVJvYm90",
+        credential: "46bf6afe-a143-11eb-a78d-0242ac140004",
+        urls: [
+            "turn:eu-turn1.xirsys.com:80?transport=udp",
+            "turn:eu-turn1.xirsys.com:3478?transport=udp",
+            "turn:eu-turn1.xirsys.com:80?transport=tcp",
+            "turn:eu-turn1.xirsys.com:3478?transport=tcp",
+            "turns:eu-turn1.xirsys.com:443?transport=tcp",
+            "turns:eu-turn1.xirsys.com:5349?transport=tcp"
+        ]
+     }]
     }
+    console.log('correct server deployed')
 
     this.receiverPCs = {}; // Saves RTCPeerConnection to receive MediaStream of connected user
     this.senderPCs = {}; // Save RTC PeerConnection to send one user MediaStream of another user except yourself

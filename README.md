@@ -7,6 +7,13 @@ A React web platform built with Three.js and TypeScript, where users can meet in
 <div style="text-align:center"><img src="client-react/public/videoCapture.gif" /></div>
 
 <br>
+<h1>Demo</h1>
+App is currently in development and demo is missing some features.
+Link to demo
+
+[here](https://client2-324717.nw.r.appspot.com/).
+
+
 <h1>Features</h1>
 
 • Users enter into 3D virtual space and is assigned an avatar
