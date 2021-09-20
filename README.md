@@ -9,7 +9,7 @@ A React web platform built with Three.js and TypeScript, where users can meet in
 <br>
 <h1>Demo</h1>
 App is currently in development and demo is missing some features.
-Link to demo
+Link to temporary demo
 
 [here](https://client2-324717.nw.r.appspot.com/).
 
